@@ -4,8 +4,10 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import { Layout, Button, Modal, Form, Input, Select, DatePicker, TimePicker, message, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import "moment/locale/ko";
 import "antd/dist/reset.css";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "./Calendar.css";
 
 const { Header, Content } = Layout;
 const { Option } = Select;
@@ -36,7 +38,7 @@ function App() {
 
 
       // 캘린더 이벤트로 변환
-      const calendarEvents = (data || []).map(meetup => ({
+      const calendarEvents = (data).map(meetup => ({
         id: meetup.id,
         title: `${meetup.place}${meetup.course ? ` (${meetup.course})` : ''}`,
         start: new Date(`${meetup.date}T${meetup.start_time || '09:00:00'}`),
@@ -136,6 +138,7 @@ function App() {
     }
   };
 
+
   const eventStyleGetter = (event) => {
     const type = event.resource.type;
     let backgroundColor = '#3174ad';
@@ -186,7 +189,7 @@ function App() {
         </Button>
       </Header>
 
-      <Content style={{ padding: '24px', background: '#fff' }}>
+      {events && <Content style={{ padding: '24px', background: '#fff' }}>
         <div style={{ height: '600px' }}>
           <Calendar
             localizer={localizer}
@@ -216,7 +219,7 @@ function App() {
             }}
           />
         </div>
-      </Content>
+      </Content>}
 
       <Modal
         title={editingEvent ? "일정 수정" : "일정 추가"}
