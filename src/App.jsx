@@ -23,6 +23,7 @@ moment.locale('ko');
 
 function App() {
   const [events, setEvents] = useState([]);
+  // const [data, setData] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [form] = Form.useForm();
@@ -38,13 +39,20 @@ function App() {
 
 
       // 캘린더 이벤트로 변환
-      const calendarEvents = (data).map(meetup => ({
-        id: meetup.id,
-        title: `${meetup.place}${meetup.course ? ` (${meetup.course})` : ''}`,
-        start: new Date(`${meetup.date}T${meetup.start_time || '09:00:00'}`),
-        end: new Date(`${meetup.date}T${meetup.start_time || '09:00:00'}`),
-        resource: meetup
-      }));
+      const calendarEvents = (data).map(meetup => {
+        const startDate = new Date(`${meetup.date}T${meetup.start_time || '09:00:00'}`);
+      const endDate = meetup.end_time
+        ? new Date(`${meetup.date}T${meetup.end_time}`)
+        : new Date(startDate.getTime() + 60 * 60 * 1000); // 기본 1시간
+        
+        return {
+          id: meetup.id,
+          title: `${meetup.place}${meetup.course ? ` (${meetup.course})` : ''}`,
+          start: startDate,
+          end: endDate,
+          resource: meetup
+        };
+      });
 
       setEvents(calendarEvents);
     } catch (error) {
@@ -189,37 +197,46 @@ function App() {
         </Button>
       </Header>
 
-      {events && <Content style={{ padding: '24px', background: '#fff' }}>
-        <div style={{ height: '600px' }}>
-          <Calendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: '100%' }}
-            onSelectSlot={handleSelectSlot}
-            onSelectEvent={handleSelectEvent}
-            selectable
-            eventPropGetter={eventStyleGetter}
-            views={['month', 'week', 'day']}
-            defaultView="month"
-            messages={{
-              next: '다음',
-              previous: '이전',
-              today: '오늘',
-              month: '월',
-              week: '주',
-              day: '일',
-              agenda: '일정',
-              date: '날짜',
-              time: '시간',
-              event: '이벤트',
-              noEventsInRange: '이 기간에 일정이 없습니다.',
-              showMore: (total) => `+${total}개 더 보기`
-            }}
-          />
-        </div>
-      </Content>}
+      <Content style={{ padding: 24, background: '#fff', minHeight: 'calc(100vh - 48px)' , maxWidth: 'calc(100vw - 48px)' }}>
+  <div style={{ width: '100%', height: '80vh' }}>
+    <Calendar
+      localizer={localizer}
+      events={events}
+      startAccessor="start"
+      endAccessor="end"
+      selectable
+      views={['month', 'week', 'day']}
+      defaultView="month"
+      popup
+      popupOffset={{ x: 10, y: 10 }}
+      showMultiDayTimes
+      step={60}
+      timeslots={1}
+      onSelectSlot={handleSelectSlot}
+      onSelectEvent={handleSelectEvent}
+      eventPropGetter={eventStyleGetter}
+      messages={{
+        next: '다음',
+        previous: '이전',
+        today: '오늘',
+        month: '월',
+        week: '주',
+        day: '일',
+        agenda: '일정',
+        date: '날짜',
+        time: '시간',
+        event: '이벤트',
+        noEventsInRange: '이 기간에 일정이 없습니다.',
+        showMore: (total) => `+${total}개 더 보기`,
+      }}
+      style={{
+        height: '100%',       // 부모 div 크기에 맞춤
+        fontSize: '14px',     // 가독성 향상
+      }}
+    />
+  </div>
+</Content>
+
 
       <Modal
         title={editingEvent ? "일정 수정" : "일정 추가"}

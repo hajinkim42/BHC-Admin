@@ -179,7 +179,6 @@
   white-space: nowrap;
   overflow: visible;
   text-overflow: unset;
-  min-height: 20px;
   display: flex;
   align-items: center;
 }
@@ -194,7 +193,7 @@
 
 /* 월 뷰에서 이벤트가 더 넓게 표시되도록 */
 .rbc-month-view .rbc-event {
-  min-height: 22px;
+  /* min-height: 22px; */
   padding: 3px 6px;
   font-size: 11px;
 }
@@ -215,7 +214,6 @@
 
 /* 주/일 뷰에서도 이벤트 텍스트 전체 표시 */
 .rbc-time-view .rbc-event {
-  min-height: 20px;
   padding: 2px 4px;
   font-size: 11px;
   white-space: nowrap;
@@ -229,18 +227,14 @@
 
 /* 더 많은 이벤트 표시를 위한 높이 조정 */
 .rbc-month-view .rbc-date-cell {
-  min-height: 100px;
   vertical-align: top;
 }
 
 /* 이벤트 컨테이너 높이 조정 */
 .rbc-month-view .rbc-events-container {
-  min-height: 80px;
-}
-
-/* 월 뷰 테이블 행 높이 조정 */
-.rbc-month-view .rbc-row {
-  min-height: 120px;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* 이벤트가 많을 때 스크롤바 제거 */
