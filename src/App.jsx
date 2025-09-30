@@ -1,9 +1,9 @@
 import "moment/locale/ko";
 import "antd/dist/reset.css";
-import Schedule from "./components/Schedule";
+import MainLayout from "./components/MainLayout";
 
 function App() {
-  return <Schedule />;
+  return <MainLayout />;
 }
 
 export default App;

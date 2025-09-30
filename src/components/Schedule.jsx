@@ -76,8 +76,8 @@ function Schedule() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0, color: '#1890ff' }}>아기 등산 모임 관리</h1>
+      <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
+        <h1 style={{ margin: 0, color: '#1890ff' }}>일정 관리</h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -91,7 +91,7 @@ function Schedule() {
         </Button>
       </Header>
 
-      <Content style={{ padding: 24, background: '#fff', minHeight: 'calc(100vh - 48px)', maxWidth: 'calc(100vw - 48px)' }}>
+      <Content style={{ padding: 24, background: '#fff', minHeight: 'calc(100vh - 64px)' }}>
         <Calendar
           events={events}
           onSelectSlot={handleSelectSlot}
