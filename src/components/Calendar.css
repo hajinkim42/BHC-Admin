@@ -1,0 +1,303 @@
+/* react-big-calendar 네비게이션 버튼 스타일 수정 */
+.rbc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px 0;
+}
+
+.rbc-toolbar button {
+  background: #1890ff;
+  color: white;
+  border: 1px solid #1890ff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 4px;
+  transition: all 0.3s;
+}
+
+.rbc-toolbar button:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.rbc-toolbar button:active {
+  background: #096dd9;
+  border-color: #096dd9;
+}
+
+.rbc-toolbar button:disabled {
+  background: #f5f5f5;
+  color: #d9d9d9;
+  border-color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+/* 버튼 클릭 이벤트 강제 활성화 */
+.rbc-toolbar button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  touch-action: manipulation !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* 활성 뷰 버튼 스타일 */
+.rbc-toolbar button.rbc-active {
+  background: #096dd9 !important;
+  border-color: #096dd9 !important;
+  font-weight: 600 !important;
+}
+
+/* 버튼 그룹 스타일 */
+.rbc-btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+.rbc-btn-group button {
+  margin: 0 !important;
+}
+
+/* Ant Design CSS 오버라이드 방지 */
+.rbc-toolbar button,
+.rbc-toolbar button:before,
+.rbc-toolbar button:after {
+  box-sizing: border-box !important;
+  -webkit-box-sizing: border-box !important;
+  -moz-box-sizing: border-box !important;
+}
+
+/* Ant Design 버튼 스타일 완전 오버라이드 */
+.rbc-toolbar button.ant-btn,
+.rbc-toolbar button[class*="ant-btn"],
+.rbc-toolbar input[type="button"],
+.rbc-toolbar input[type="submit"],
+.rbc-toolbar input[type="reset"] {
+  background: #1890ff !important;
+  color: white !important;
+  border: 1px solid #1890ff !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  margin: 0 4px !important;
+  transition: all 0.3s !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  touch-action: manipulation !important;
+  white-space: nowrap !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  min-width: auto !important;
+  height: auto !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* 모든 가능한 버튼 요소에 적용 */
+.rbc-toolbar *[role="button"],
+.rbc-toolbar *[onclick],
+.rbc-toolbar *[onClick] {
+  background: #1890ff !important;
+  color: white !important;
+  border: 1px solid #1890ff !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  margin: 0 4px !important;
+  transition: all 0.3s !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  touch-action: manipulation !important;
+  white-space: nowrap !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  min-width: auto !important;
+  height: auto !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.rbc-toolbar-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.rbc-btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+.rbc-btn-group button {
+  margin: 0;
+}
+
+/* 캘린더 헤더 스타일 */
+.rbc-header {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 8px;
+  font-weight: 600;
+  color: #262626;
+}
+
+/* 오늘 날짜 하이라이트 */
+.rbc-today {
+  background-color: #e6f7ff !important;
+}
+
+/* 이벤트 스타일 */
+.rbc-event {
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  display: flex;
+  align-items: center;
+}
+
+/* 이벤트 텍스트가 잘리지 않도록 */
+.rbc-event-content {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  width: 100%;
+}
+
+/* 월 뷰에서 이벤트가 더 넓게 표시되도록 */
+.rbc-month-view .rbc-event {
+  /* min-height: 22px; */
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+/* 여러 이벤트가 있을 때 스크롤 없이 모두 표시 */
+.rbc-month-view .rbc-date-cell {
+  overflow: visible;
+}
+
+.rbc-month-view .rbc-events-container {
+  overflow: visible;
+}
+
+/* 이벤트가 겹치지 않도록 간격 조정 */
+.rbc-month-view .rbc-event + .rbc-event {
+  margin-top: 1px;
+}
+
+/* 주/일 뷰에서도 이벤트 텍스트 전체 표시 */
+.rbc-time-view .rbc-event {
+  padding: 2px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* 이벤트 라벨 스타일 */
+.rbc-event-label {
+  display: none; /* 시간 라벨 숨김 (공간 절약) */
+}
+
+/* 더 많은 이벤트 표시를 위한 높이 조정 */
+.rbc-month-view .rbc-date-cell {
+  vertical-align: top;
+}
+
+/* 이벤트 컨테이너 높이 조정 */
+.rbc-month-view .rbc-events-container {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 이벤트가 많을 때 스크롤바 제거 */
+.rbc-month-view .rbc-events-container::-webkit-scrollbar {
+  display: none;
+}
+
+.rbc-month-view .rbc-events-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 이벤트 텍스트 크기 조정 */
+.rbc-event-content {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* 더 많은 이벤트를 위한 추가 공간 */
+.rbc-month-view .rbc-date-cell {
+  padding: 4px;
+}
+
+/* 이벤트 간격 조정 */
+.rbc-month-view .rbc-event {
+  margin-bottom: 1px;
+}
+
+/* 팝업 스타일 개선 */
+.rbc-overlay {
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  max-width: 300px;
+}
+
+.rbc-overlay-header {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #262626;
+}
+
+/* 시간 표시 */
+.rbc-time-view .rbc-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 월 뷰 날짜 셀 */
+.rbc-date-cell {
+  padding: 8px;
+  text-align: right;
+}
+
+.rbc-off-range-bg {
+  background: #fafafa;
+}
+
+.rbc-off-range {
+  color: #bfbfbf;
+}
