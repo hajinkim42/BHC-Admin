@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { createClient } from "@supabase/supabase-js";
-import { message } from "antd";
+import { createClient } from '@supabase/supabase-js';
+import { message } from 'antd';
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 export const useEvents = () => {
   const [events, setEvents] = useState([]);
@@ -11,22 +14,29 @@ export const useEvents = () => {
   const getMeetups = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from("meetups").select("*").order('date', { ascending: true });
+      const { data, error } = await supabase
+        .from('meetups')
+        .select('*')
+        .order('date', { ascending: true });
       if (error) throw error;
 
       // 캘린더 이벤트로 변환
-      const calendarEvents = (data).map(meetup => {
-        const startDate = new Date(`${meetup.date}T${meetup.start_time || '09:00:00'}`);
+      const calendarEvents = data.map(meetup => {
+        const startDate = new Date(
+          `${meetup.date}T${meetup.start_time || '09:00:00'}`
+        );
         const endDate = meetup.end_time
           ? new Date(`${meetup.date}T${meetup.end_time}`)
           : new Date(startDate.getTime() + 60 * 60 * 1000); // 기본 1시간
-        
+
         return {
           id: meetup.id,
-          title: `${meetup.place}${meetup.course ? ` (${meetup.course})` : ''}`,
+          title:
+            meetup.title ||
+            `${meetup.place}${meetup.course ? ` (${meetup.course})` : ''}`,
           start: startDate,
           end: endDate,
-          resource: meetup
+          resource: meetup,
         };
       });
 
@@ -41,11 +51,9 @@ export const useEvents = () => {
     }
   };
 
-  const addEvent = async (meetupData) => {
+  const addEvent = async meetupData => {
     try {
-      const { error } = await supabase
-        .from('meetups')
-        .insert([meetupData]);
+      const { error } = await supabase.from('meetups').insert([meetupData]);
 
       if (error) throw error;
       message.success('일정이 추가되었습니다.');
@@ -72,7 +80,7 @@ export const useEvents = () => {
     }
   };
 
-  const deleteEvent = async (eventId) => {
+  const deleteEvent = async eventId => {
     try {
       const { error } = await supabase
         .from('meetups')
@@ -98,6 +106,6 @@ export const useEvents = () => {
     addEvent,
     updateEvent,
     deleteEvent,
-    refreshEvents: getMeetups
+    refreshEvents: getMeetups,
   };
 };

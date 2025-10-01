@@ -1,4 +1,4 @@
-export const getEventStyle = (event) => {
+export const getEventStyle = event => {
   const type = event.resource.type;
   let backgroundColor = '#3174ad';
 
@@ -26,7 +26,7 @@ export const getEventStyle = (event) => {
       opacity: 0.8,
       color: 'white',
       border: '0px',
-      display: 'block'
-    }
+      display: 'block',
+    },
   };
 };

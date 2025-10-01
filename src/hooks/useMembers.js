@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { createClient } from "@supabase/supabase-js";
-import { message } from "antd";
+import { createClient } from '@supabase/supabase-js';
+import { message } from 'antd';
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 export const useMembers = () => {
   const [members, setMembers] = useState([]);
@@ -11,12 +14,10 @@ export const useMembers = () => {
   const getMembers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("members")
-        .select("*");
-      
+      const { data, error } = await supabase.from('members').select('*');
+
       if (error) throw error;
-      
+
       console.log('Members data:', data);
       setMembers(data || []);
     } catch (error) {
@@ -27,11 +28,9 @@ export const useMembers = () => {
     }
   };
 
-  const addMember = async (memberData) => {
+  const addMember = async memberData => {
     try {
-      const { error } = await supabase
-        .from('members')
-        .insert([memberData]);
+      const { error } = await supabase.from('members').insert([memberData]);
 
       if (error) throw error;
       message.success('회원이 추가되었습니다.');
@@ -58,7 +57,7 @@ export const useMembers = () => {
     }
   };
 
-  const deleteMember = async (memberId) => {
+  const deleteMember = async memberId => {
     try {
       const { error } = await supabase
         .from('members')
@@ -84,6 +83,6 @@ export const useMembers = () => {
     addMember,
     updateMember,
     deleteMember,
-    refreshMembers: getMembers
+    refreshMembers: getMembers,
   };
 };

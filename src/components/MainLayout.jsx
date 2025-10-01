@@ -28,9 +28,7 @@ const MainLayout = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sidebar selectedKey={selectedKey} onMenuClick={handleMenuClick} />
       <Layout style={{ width: '100%' }}>
-        <Content style={{ margin: 0, padding: 0 }}>
-          {renderContent()}
-        </Content>
+        <Content style={{ margin: 0, padding: 0 }}>{renderContent()}</Content>
       </Layout>
     </Layout>
   );

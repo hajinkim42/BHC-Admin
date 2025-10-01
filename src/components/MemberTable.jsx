@@ -6,7 +6,8 @@ import { useMembers } from '../hooks/useMembers';
 const { Option } = Select;
 
 const MemberTable = () => {
-  const { members, loading, addMember, updateMember, deleteMember } = useMembers();
+  const { members, loading, addMember, updateMember, deleteMember } =
+    useMembers();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [form] = Form.useForm();
@@ -41,14 +42,14 @@ const MemberTable = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       width: 120,
-      render: (date) => date ? new Date(date).toLocaleDateString() : '-',
+      render: date => (date ? new Date(date).toLocaleDateString() : '-'),
     },
     {
       title: '상태',
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status) => (
+      render: status => (
         <Tag color={status === 'active' ? 'green' : 'red'}>
           {status === 'active' ? '활성' : '비활성'}
         </Tag>
@@ -60,17 +61,17 @@ const MemberTable = () => {
       width: 150,
       render: (_, record) => (
         <Space size="small">
-          <Button 
-            type="primary" 
-            size="small" 
+          <Button
+            type="primary"
+            size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
             수정
           </Button>
-          <Button 
-            danger 
-            size="small" 
+          <Button
+            danger
+            size="small"
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record)}
           >
@@ -81,13 +82,13 @@ const MemberTable = () => {
     },
   ];
 
-  const handleEdit = (record) => {
+  const handleEdit = record => {
     setEditingMember(record);
     form.setFieldsValue(record);
     setIsModalVisible(true);
   };
 
-  const handleDelete = (record) => {
+  const handleDelete = record => {
     Modal.confirm({
       title: '회원 삭제',
       content: `${record.name} 회원을 삭제하시겠습니까?`,
@@ -123,22 +124,20 @@ const MemberTable = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '16px' 
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+        }}
+      >
         <h2 style={{ margin: 0 }}>회원 관리</h2>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
           회원 추가
         </Button>
       </div>
-      
+
       <Table
         columns={columns}
         dataSource={members}
@@ -148,7 +147,7 @@ const MemberTable = () => {
           pageSize: 10,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) => 
+          showTotal: (total, range) =>
             `${range[0]}-${range[1]} / 총 ${total}개`,
         }}
         scroll={{ x: 800 }}
@@ -174,18 +173,18 @@ const MemberTable = () => {
           >
             <Input placeholder="이름을 입력하세요" />
           </Form.Item>
-          
+
           <Form.Item
             name="email"
             label="이메일"
             rules={[
               { required: true, message: '이메일을 입력해주세요' },
-              { type: 'email', message: '올바른 이메일 형식을 입력해주세요' }
+              { type: 'email', message: '올바른 이메일 형식을 입력해주세요' },
             ]}
           >
             <Input placeholder="이메일을 입력하세요" />
           </Form.Item>
-          
+
           <Form.Item
             name="phone"
             label="전화번호"
@@ -193,7 +192,7 @@ const MemberTable = () => {
           >
             <Input placeholder="전화번호를 입력하세요" />
           </Form.Item>
-          
+
           <Form.Item
             name="status"
             label="상태"

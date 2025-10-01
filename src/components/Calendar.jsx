@@ -1,8 +1,8 @@
-import { Calendar as RBCalendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
-import "moment/locale/ko";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "./Calendar.css";
+import { Calendar as RBCalendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'moment/locale/ko';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './Calendar.css';
 
 // moment 로컬라이저 설정
 const localizer = momentLocalizer(moment);
@@ -10,12 +10,7 @@ const localizer = momentLocalizer(moment);
 // 한국어 설정
 moment.locale('ko');
 
-const Calendar = ({ 
-  events, 
-  onSelectSlot, 
-  onSelectEvent, 
-  eventPropGetter 
-}) => {
+const Calendar = ({ events, onSelectSlot, onSelectEvent, eventPropGetter }) => {
   return (
     <div style={{ width: '100%', height: '80vh' }}>
       <RBCalendar
@@ -46,7 +41,7 @@ const Calendar = ({
           time: '시간',
           event: '이벤트',
           noEventsInRange: '이 기간에 일정이 없습니다.',
-          showMore: (total) => `+${total}개 더 보기`,
+          showMore: total => `+${total}개 더 보기`,
         }}
         style={{
           height: '100%',

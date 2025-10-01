@@ -25,13 +25,15 @@ const Sidebar = ({ selectedKey, onMenuClick }) => {
         borderRight: '1px solid #f0f0f0',
       }}
     >
-      <div style={{ 
-        padding: '16px', 
-        borderBottom: '1px solid #f0f0f0',
-        fontSize: '16px',
-        fontWeight: 'bold',
-        color: '#1890ff'
-      }}>
+      <div
+        style={{
+          padding: '16px',
+          borderBottom: '1px solid #f0f0f0',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#1890ff',
+        }}
+      >
         BHC 관리자
       </div>
       <Menu

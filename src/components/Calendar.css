@@ -79,10 +79,10 @@
 
 /* Ant Design 버튼 스타일 완전 오버라이드 */
 .rbc-toolbar button.ant-btn,
-.rbc-toolbar button[class*="ant-btn"],
-.rbc-toolbar input[type="button"],
-.rbc-toolbar input[type="submit"],
-.rbc-toolbar input[type="reset"] {
+.rbc-toolbar button[class*='ant-btn'],
+.rbc-toolbar input[type='button'],
+.rbc-toolbar input[type='submit'],
+.rbc-toolbar input[type='reset'] {
   background: #1890ff !important;
   color: white !important;
   border: 1px solid #1890ff !important;
@@ -111,7 +111,7 @@
 }
 
 /* 모든 가능한 버튼 요소에 적용 */
-.rbc-toolbar *[role="button"],
+.rbc-toolbar *[role='button'],
 .rbc-toolbar *[onclick],
 .rbc-toolbar *[onClick] {
   background: #1890ff !important;
