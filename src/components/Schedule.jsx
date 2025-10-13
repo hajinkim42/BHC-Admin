@@ -31,17 +31,16 @@ function Schedule() {
           ? values.start_time.format('HH:mm:ss')
           : null,
         title: values.title,
-        leader: values.leader,
-        place: values.place,
+        leader_member_id: values.leader_id,
+        leader_nickname: values.leader_nickname,
         course: values.course || null,
         type: values.type,
-        difficulty: values.difficulty || null,
-        is_completed: values.is_completed,
+        level: values.level || null,
+        status: values.status,
         cancel_reason: values.cancel_reason || null,
-        total_donation: values.total_donation || 0,
-        attendees: values.attendees || [],
-        reflections: values.reflections || null,
+        review: values.review || null,
       };
+      console.log('meetupData', meetupData);
 
       if (editingEvent) {
         await updateEvent(editingEvent.id, meetupData);

@@ -25,7 +25,7 @@ const { TextArea } = Input;
 const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState(null);
-  const [selectedIsCompleted, setSelectedIsCompleted] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const [leaderOptions, setLeaderOptions] = useState([]);
   const { members } = useMembers();
 
@@ -61,6 +61,12 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
     try {
       const values = await form.validateFields();
       await onOk(values);
+
+      // 폼 값 초기화
+      form.resetFields();
+      setSelectedType(null);
+      setSelectedStatus(null);
+      setLeaderOptions([]);
     } catch (error) {
       console.error('Error saving meetup:', error);
     }
@@ -69,7 +75,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
   const handleCancel = () => {
     form.resetFields();
     setSelectedType(null);
-    setSelectedIsCompleted(null);
+    setSelectedStatus(null);
     onCancel();
   };
 
@@ -82,30 +88,30 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         start_time: meetup.start_time
           ? moment(meetup.start_time, 'HH:mm:ss')
           : null,
-        leader: meetup.leader,
+        title: meetup.title,
+        leader_nickname: meetup.leader_nickname,
         leader_id: meetup.leader_id,
-        place: meetup.place,
         course: meetup.course,
         type: meetup.type,
-        difficulty: meetup.difficulty,
-        is_completed: meetup.is_completed,
+        level: meetup.level,
+        status: meetup.status,
         cancel_reason: meetup.cancel_reason,
         total_donation: meetup.total_donation,
         attendees: meetup.attendees || [],
-        reflections: meetup.reflections,
+        review: meetup.review,
       });
       setSelectedType(meetup.type);
-      setSelectedIsCompleted(meetup.is_completed);
+      setSelectedStatus(meetup.status);
     } else {
       // 새 이벤트 생성 시 기본값 설정
       form.setFieldsValue({
         date: moment(),
         start_time: moment('09:00', 'HH:mm'),
-        is_completed: true,
+        status: 'pending',
         total_donation: 0,
       });
       setSelectedType(null);
-      setSelectedIsCompleted(true);
+      setSelectedStatus('pending');
     }
   }, [editingEvent, form]);
 
@@ -123,19 +129,19 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         form={form}
         layout="vertical"
         initialValues={{
-          is_completed: true,
+          status: '진행 전',
           total_donation: 0,
         }}
         onValuesChange={changedValues => {
           // eslint-disable-next-line no-prototype-builtins
-          if (changedValues.hasOwnProperty('is_completed')) {
-            console.log('is_completed changed:', changedValues.is_completed);
-            setSelectedIsCompleted(changedValues.is_completed);
+          if (changedValues.hasOwnProperty('status')) {
+            console.log('status changed:', changedValues.status);
+            setSelectedStatus(changedValues.status);
           }
         }}
       >
         <Form.Item
-          name="place"
+          name="title"
           label="제목"
           rules={[{ required: true, message: '제목을 입력해주세요' }]}
         >
@@ -143,9 +149,9 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         </Form.Item>
 
         <Form.Item
-          name="leader"
+          name="leader_nickname"
           label="리딩자"
-          rules={[{ required: true, message: '리딩자를 입력해주세요' }]}
+          rules={[{ required: true, message: '모임 리딩자를 입력해주세요' }]}
         >
           <AutoComplete
             options={leaderOptions}
@@ -173,6 +179,11 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           </AutoComplete>
         </Form.Item>
 
+        {/* leader_id를 values에 포함시키기 위한 hidden 필드 */}
+        <Form.Item name="leader_id" style={{ display: 'none' }}>
+          <Input type="hidden" />
+        </Form.Item>
+
         <Form.Item
           name="date"
           label="날짜"
@@ -185,8 +196,8 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
         </Form.Item>
 
-        <Form.Item name="course" label="코스">
-          <Input placeholder="코스 정보 (선택사항)" />
+        <Form.Item name="course" label="설명">
+          <Input placeholder="설명을 입력하세요(선택사항)" />
         </Form.Item>
 
         <Form.Item
@@ -208,7 +219,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         {/* 등산일 때만 난이도 표시 */}
         {selectedType === '등산' && (
           <Form.Item
-            name="difficulty"
+            name="level"
             label="난이도"
             rules={[{ required: true, message: '난이도를 선택해주세요' }]}
           >
@@ -221,20 +232,23 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         )}
 
         {/* 일정 완료 관련 필드들 */}
-        <Form.Item name="is_completed" label="모임 진행 여부">
+        <Form.Item name="status" label="모임 진행 상태">
           <Select>
-            <Option value={true}>정상 진행</Option>
-            <Option value={false}>취소됨</Option>
+            <Option value="진행 전">진행 전</Option>
+            <Option value="완료">완료</Option>
+            <Option value="취소">취소</Option>
           </Select>
         </Form.Item>
 
-        {selectedIsCompleted === false && (
+        {selectedStatus === '취소' && (
           <Form.Item name="cancel_reason" label="취소 사유">
-            <Select placeholder="취소 사유를 선택하세요">
-              <Option value="날씨">날씨</Option>
-              <Option value="인원미달">인원미달</Option>
-              <Option value="기타">기타</Option>
-            </Select>
+            <TextArea placeholder="취소 사유를 입력하세요" rows={3} />
+          </Form.Item>
+        )}
+
+        {selectedStatus === '완료' && (
+          <Form.Item name="review" label="소감">
+            <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
           </Form.Item>
         )}
       </Form>
@@ -244,8 +258,16 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           <Button
             danger
             onClick={() => {
-              onDelete(editingEvent.id);
-              handleCancel();
+              Modal.confirm({
+                title: '일정 삭제',
+                content: '일정을 삭제하시겠습니까?',
+                okText: '삭제',
+                cancelText: '취소',
+                onOk: () => {
+                  onDelete(editingEvent.id);
+                  handleCancel();
+                },
+              });
             }}
           >
             삭제
