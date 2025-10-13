@@ -18,7 +18,6 @@ export const useMembers = () => {
 
       if (error) throw error;
 
-      console.log('Members data:', data);
       setMembers(data || []);
     } catch (error) {
       message.error('회원 목록을 불러오는데 실패했습니다.');

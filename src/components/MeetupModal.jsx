@@ -9,6 +9,7 @@ import {
   Button,
   InputNumber,
   Space,
+  AutoComplete,
 } from 'antd';
 import {
   PlusOutlined,
@@ -16,6 +17,7 @@ import {
   MinusCircleOutlined,
 } from '@ant-design/icons';
 import moment from 'moment';
+import { useMembers } from '../hooks/useMembers';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -24,6 +26,36 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState(null);
   const [selectedIsCompleted, setSelectedIsCompleted] = useState(null);
+  const [leaderOptions, setLeaderOptions] = useState([]);
+  const { members } = useMembers();
+
+  // nickname으로 member id를 찾는 함수
+  const findMemberIdByNickname = nickname => {
+    const matchingMembers = members.filter(
+      m => m.nickname && m.nickname.includes(nickname)
+    );
+    return matchingMembers.length > 0 ? matchingMembers[0].id : null;
+  };
+
+  // 자동완성을 위한 옵션 생성 함수
+  const getLeaderOptions = nickname => {
+    if (!nickname || nickname.length < 1) {
+      setLeaderOptions([]);
+      return;
+    }
+
+    const matchingMembers = members.filter(
+      m => m.nickname && m.nickname.includes(nickname)
+    );
+
+    const options = matchingMembers.map(member => ({
+      value: member.nickname,
+      label: member.nickname,
+      memberId: member.id,
+    }));
+
+    setLeaderOptions(options);
+  };
 
   const handleOk = async () => {
     try {
@@ -50,8 +82,8 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         start_time: meetup.start_time
           ? moment(meetup.start_time, 'HH:mm:ss')
           : null,
-        title: meetup.title,
         leader: meetup.leader,
+        leader_id: meetup.leader_id,
         place: meetup.place,
         course: meetup.course,
         type: meetup.type,
@@ -102,13 +134,12 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           }
         }}
       >
-        {/* 기본 정보 */}
         <Form.Item
-          name="title"
+          name="place"
           label="제목"
           rules={[{ required: true, message: '제목을 입력해주세요' }]}
         >
-          <Input placeholder="일정 제목을 입력하세요" />
+          <Input placeholder="제목을 입력하세요" />
         </Form.Item>
 
         <Form.Item
@@ -116,10 +147,30 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           label="리딩자"
           rules={[{ required: true, message: '리딩자를 입력해주세요' }]}
         >
-          <Input
-            placeholder="리딩자 이름을 입력하세요"
-            prefix={<UserOutlined />}
-          />
+          <AutoComplete
+            options={leaderOptions}
+            placeholder="리딩자 닉네임을 입력하세요"
+            onSearch={getLeaderOptions}
+            onSelect={(value, option) => {
+              form.setFieldValue('leader_id', option.memberId);
+            }}
+            filterOption={false}
+            notFoundContent="일치하는 회원이 없습니다"
+          >
+            <Input
+              onChange={e => {
+                const nickname = e.target.value;
+                const memberId = findMemberIdByNickname(nickname);
+                if (memberId) {
+                  // 폼에 leader_id 필드도 설정
+                  form.setFieldValue('leader_id', memberId);
+                } else if (nickname) {
+                  console.warn('Member not found for nickname:', nickname);
+                  form.setFieldValue('leader_id', null);
+                }
+              }}
+            />
+          </AutoComplete>
         </Form.Item>
 
         <Form.Item
@@ -130,16 +181,8 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
 
-        <Form.Item name="start_time" label="시작 시간">
+        <Form.Item name="start_time" label="시간">
           <TimePicker style={{ width: '100%' }} format="HH:mm" />
-        </Form.Item>
-
-        <Form.Item
-          name="place"
-          label="장소"
-          rules={[{ required: true, message: '장소를 입력해주세요' }]}
-        >
-          <Input placeholder="장소를 입력하세요" />
         </Form.Item>
 
         <Form.Item name="course" label="코스">

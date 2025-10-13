@@ -26,34 +26,18 @@ const MemberTable = () => {
       width: 120,
     },
     {
-      title: '이메일',
-      dataIndex: 'email',
+      title: '닉네임',
+      dataIndex: 'nickname',
       key: 'email',
       width: 200,
     },
-    {
-      title: '전화번호',
-      dataIndex: 'phone',
-      key: 'phone',
-      width: 150,
-    },
+
     {
       title: '가입일',
-      dataIndex: 'created_at',
-      key: 'created_at',
+      dataIndex: 'joined_at',
+      key: 'joined_at',
       width: 120,
       render: date => (date ? new Date(date).toLocaleDateString() : '-'),
-    },
-    {
-      title: '상태',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: status => (
-        <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status === 'active' ? '활성' : '비활성'}
-        </Tag>
-      ),
     },
     {
       title: '액션',
