@@ -27,6 +27,9 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
   const [selectedType, setSelectedType] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [leaderOptions, setLeaderOptions] = useState([]);
+  const [attendeeOptions, setAttendeeOptions] = useState([]);
+  const [selectedAttendees, setSelectedAttendees] = useState([]);
+  const [attendeeInputValue, setAttendeeInputValue] = useState('');
   const { members } = useMembers();
 
   // nickname으로 member id를 찾는 함수
@@ -57,6 +60,26 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
     setLeaderOptions(options);
   };
 
+  // 참가자 자동완성을 위한 옵션 생성 함수
+  const getAttendeeOptions = nickname => {
+    if (!nickname || nickname.length < 1) {
+      setAttendeeOptions([]);
+      return;
+    }
+
+    const matchingMembers = members.filter(
+      m => m.nickname && m.nickname.includes(nickname)
+    );
+
+    const options = matchingMembers.map(member => ({
+      value: member.nickname,
+      label: member.nickname,
+      memberId: member.id,
+    }));
+
+    setAttendeeOptions(options);
+  };
+
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
@@ -67,6 +90,9 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
       setSelectedType(null);
       setSelectedStatus(null);
       setLeaderOptions([]);
+      setAttendeeOptions([]);
+      setSelectedAttendees([]);
+      setAttendeeInputValue('');
     } catch (error) {
       console.error('Error saving meetup:', error);
     }
@@ -76,6 +102,8 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
     form.resetFields();
     setSelectedType(null);
     setSelectedStatus(null);
+    setSelectedAttendees([]);
+    setAttendeeInputValue('');
     onCancel();
   };
 
@@ -102,6 +130,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
       });
       setSelectedType(meetup.type);
       setSelectedStatus(meetup.status);
+      setSelectedAttendees(meetup.attendees || []);
     } else {
       // 새 이벤트 생성 시 기본값 설정
       form.setFieldsValue({
@@ -247,9 +276,111 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         )}
 
         {selectedStatus === '완료' && (
-          <Form.Item name="review" label="소감">
-            <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
-          </Form.Item>
+          <>
+            <Form.Item label="참가자 명단">
+              <AutoComplete
+                value={attendeeInputValue}
+                options={attendeeOptions}
+                onSearch={value => {
+                  setAttendeeInputValue(value);
+                  getAttendeeOptions(value);
+                }}
+                onSelect={(value, option) => {
+                  console.log('value', value);
+                  const currentAttendees =
+                    form.getFieldValue('attendees') || [];
+
+                  // 중복 참가자 체크
+                  const isDuplicate = currentAttendees.some(
+                    attendee => attendee.memberId === option.memberId
+                  );
+
+                  if (!isDuplicate) {
+                    const newAttendees = [
+                      ...currentAttendees,
+                      {
+                        nickname: value,
+                        memberId: option.memberId,
+                      },
+                    ];
+                    console.log('currentAttendees', currentAttendees);
+                    console.log('newAttendees', newAttendees);
+                    form.setFieldValue('attendees', newAttendees);
+                    setSelectedAttendees(newAttendees);
+                  }
+
+                  // 입력 필드 초기화
+                  setAttendeeInputValue('');
+                  setAttendeeOptions([]);
+                }}
+                filterOption={false}
+                notFoundContent="일치하는 회원이 없습니다"
+              >
+                <Input placeholder="참가자 닉네임을 입력하세요" />
+              </AutoComplete>
+            </Form.Item>
+
+            {/* 숨겨진 attendees 필드 */}
+            <Form.Item name="attendees" style={{ display: 'none' }}>
+              <Input type="hidden" />
+            </Form.Item>
+
+            {/* 선택된 참가자 리스트 표시 */}
+            {selectedAttendees.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginBottom: '8px',
+                  }}
+                >
+                  선택된 참가자:
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {selectedAttendees.map((attendee, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        background: '#f0f0f0',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <span>{attendee.nickname}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newAttendees = selectedAttendees.filter(
+                            (_, i) => i !== index
+                          );
+                          setSelectedAttendees(newAttendees);
+                          form.setFieldValue('attendees', newAttendees);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#999',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Form.Item name="review" label="소감">
+              <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
+            </Form.Item>
+          </>
         )}
       </Form>
 
