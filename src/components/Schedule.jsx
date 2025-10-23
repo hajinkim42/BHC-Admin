@@ -41,7 +41,6 @@ function Schedule() {
         review: values.review || null,
         attendees: values.attendees || [],
       };
-      console.log('meetupData', meetupData);
 
       if (editingEvent) {
         await updateEvent(editingEvent.id, meetupData);

@@ -67,8 +67,6 @@ export const useEvents = () => {
         };
       });
 
-      console.log('Calendar events:', calendarEvents);
-      console.log('Events count:', calendarEvents.length);
       setEvents(calendarEvents);
     } catch (error) {
       message.error('일정을 불러오는데 실패했습니다.');

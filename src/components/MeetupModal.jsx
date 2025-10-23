@@ -7,15 +7,8 @@ import {
   DatePicker,
   TimePicker,
   Button,
-  InputNumber,
-  Space,
   AutoComplete,
 } from 'antd';
-import {
-  PlusOutlined,
-  UserOutlined,
-  MinusCircleOutlined,
-} from '@ant-design/icons';
 import moment from 'moment';
 import { useMembers } from '../hooks/useMembers';
 
@@ -164,7 +157,6 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         onValuesChange={changedValues => {
           // eslint-disable-next-line no-prototype-builtins
           if (changedValues.hasOwnProperty('status')) {
-            console.log('status changed:', changedValues.status);
             setSelectedStatus(changedValues.status);
           }
         }}
@@ -286,7 +278,6 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
                   getAttendeeOptions(value);
                 }}
                 onSelect={(value, option) => {
-                  console.log('value', value);
                   const currentAttendees =
                     form.getFieldValue('attendees') || [];
 
@@ -305,8 +296,6 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
                         donationAmount: 0,
                       },
                     ];
-                    console.log('currentAttendees', currentAttendees);
-                    console.log('newAttendees', newAttendees);
                     form.setFieldValue('attendees', newAttendees);
                     setSelectedAttendees(newAttendees);
                   }
@@ -320,64 +309,57 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
               >
                 <Input placeholder="참가자 닉네임을 입력하세요" />
               </AutoComplete>
+
+              {/* 선택된 참가자 리스트 표시 */}
+              {selectedAttendees.length > 0 && (
+                <div style={{ marginTop: '8px' }}>
+                  <div
+                    style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
+                  >
+                    {selectedAttendees.map((attendee, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          background: '#f0f0f0',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <span>{attendee.nickname}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newAttendees = selectedAttendees.filter(
+                              (_, i) => i !== index
+                            );
+                            setSelectedAttendees(newAttendees);
+                            form.setFieldValue('attendees', newAttendees);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#999',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </Form.Item>
 
             {/* 숨겨진 attendees 필드 */}
             <Form.Item name="attendees" style={{ display: 'none' }}>
               <Input type="hidden" />
             </Form.Item>
-
-            {/* 선택된 참가자 리스트 표시 */}
-            {selectedAttendees.length > 0 && (
-              <div style={{ marginTop: '8px' }}>
-                <div
-                  style={{
-                    fontSize: '14px',
-                    color: '#666',
-                    marginBottom: '8px',
-                  }}
-                >
-                  선택된 참가자:
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {selectedAttendees.map((attendee, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        background: '#f0f0f0',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <span>{attendee.nickname}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newAttendees = selectedAttendees.filter(
-                            (_, i) => i !== index
-                          );
-                          setSelectedAttendees(newAttendees);
-                          form.setFieldValue('attendees', newAttendees);
-                        }}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#999',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <Form.Item name="review" label="소감">
               <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
