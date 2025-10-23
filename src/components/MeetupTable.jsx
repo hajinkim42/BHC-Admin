@@ -40,18 +40,20 @@ const MeetupTable = () => {
   const [form] = Form.useForm();
   const { events, addEvent, updateEvent } = useEvents();
 
-  // // 선택된 모임이 변경될 때 스크롤을 페이지 상단으로 이동
-  // useEffect(() => {
-  //   if (selectedMeetup) {
-  //     setTimeout(() => {
-  //       window.scrollTo({
-  //         top: 0,
-  //         behavior: 'smooth',
-  //         block: 'nearest',
-  //       });
-  //     }, 100);
-  //   }
-  // }, [selectedMeetup]);
+  // 선택된 모임이 변경될 때 상세 정보로 스크롤 이동
+  useEffect(() => {
+    if (selectedMeetup) {
+      setTimeout(() => {
+        const detailCard = document.querySelector('[data-meetup-detail]');
+        if (detailCard) {
+          detailCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+      }, 100);
+    }
+  }, [selectedMeetup]);
 
   const handleAdd = () => {
     setEditingMeetup(null);
@@ -201,16 +203,16 @@ const MeetupTable = () => {
           style: { cursor: 'pointer' },
         })}
         pagination={{
-          pageSize: 10,
+          pageSize: 5,
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) => `${range[0]}-${range[1]} / ${total}개`,
         }}
-        // scroll={{ x: 1200, y: 400 }}
       />
 
       {selectedMeetup && (
         <Card
+          data-meetup-detail
           title={
             <Space>
               <TeamOutlined />
