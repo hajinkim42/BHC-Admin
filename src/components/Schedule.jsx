@@ -39,6 +39,7 @@ function Schedule() {
         status: values.status,
         cancel_reason: values.cancel_reason || null,
         review: values.review || null,
+        attendees: values.attendees || [],
       };
       console.log('meetupData', meetupData);
 

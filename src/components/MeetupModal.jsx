@@ -301,6 +301,8 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
                       {
                         nickname: value,
                         memberId: option.memberId,
+                        donationPaid: false,
+                        donationAmount: 0,
                       },
                     ];
                     console.log('currentAttendees', currentAttendees);
