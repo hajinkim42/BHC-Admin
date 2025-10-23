@@ -134,7 +134,7 @@ const MemberTable = () => {
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} / 총 ${total}개`,
         }}
-        scroll={{ x: 800 }}
+        // scroll={{ x: 800 }}
         bordered
       />
 

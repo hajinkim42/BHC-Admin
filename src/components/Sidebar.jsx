@@ -1,5 +1,9 @@
 import { Layout, Menu } from 'antd';
-import { CalendarOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  CalendarOutlined,
+  UserOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
 
 const { Sider } = Layout;
 
@@ -14,6 +18,11 @@ const Sidebar = ({ selectedKey, onMenuClick }) => {
       key: 'members',
       icon: <UserOutlined />,
       label: '회원관리',
+    },
+    {
+      key: 'meetups',
+      icon: <TeamOutlined />,
+      label: '모임관리',
     },
   ];
 
