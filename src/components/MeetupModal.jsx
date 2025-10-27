@@ -7,10 +7,11 @@ import {
   DatePicker,
   TimePicker,
   Button,
-  AutoComplete,
 } from 'antd';
 import moment from 'moment';
 import { useMembers } from '../hooks/useMembers';
+import MemberAutoComplete from './MemberAutoComplete';
+import AttendeeManager from './AttendeeManager';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -19,59 +20,8 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const [leaderOptions, setLeaderOptions] = useState([]);
-  const [attendeeOptions, setAttendeeOptions] = useState([]);
   const [selectedAttendees, setSelectedAttendees] = useState([]);
-  const [attendeeInputValue, setAttendeeInputValue] = useState('');
   const { members } = useMembers();
-
-  // nickname으로 member id를 찾는 함수
-  const findMemberIdByNickname = nickname => {
-    const matchingMembers = members.filter(
-      m => m.nickname && m.nickname.includes(nickname)
-    );
-    return matchingMembers.length > 0 ? matchingMembers[0].id : null;
-  };
-
-  // 자동완성을 위한 옵션 생성 함수
-  const getLeaderOptions = nickname => {
-    if (!nickname || nickname.length < 1) {
-      setLeaderOptions([]);
-      return;
-    }
-
-    const matchingMembers = members.filter(
-      m => m.nickname && m.nickname.includes(nickname)
-    );
-
-    const options = matchingMembers.map(member => ({
-      value: member.nickname,
-      label: member.nickname,
-      memberId: member.id,
-    }));
-
-    setLeaderOptions(options);
-  };
-
-  // 참가자 자동완성을 위한 옵션 생성 함수
-  const getAttendeeOptions = nickname => {
-    if (!nickname || nickname.length < 1) {
-      setAttendeeOptions([]);
-      return;
-    }
-
-    const matchingMembers = members.filter(
-      m => m.nickname && m.nickname.includes(nickname)
-    );
-
-    const options = matchingMembers.map(member => ({
-      value: member.nickname,
-      label: member.nickname,
-      memberId: member.id,
-    }));
-
-    setAttendeeOptions(options);
-  };
 
   const handleOk = async () => {
     try {
@@ -82,10 +32,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
       form.resetFields();
       setSelectedType(null);
       setSelectedStatus(null);
-      setLeaderOptions([]);
-      setAttendeeOptions([]);
       setSelectedAttendees([]);
-      setAttendeeInputValue('');
     } catch (error) {
       console.error('Error saving meetup:', error);
     }
@@ -96,7 +43,6 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
     setSelectedType(null);
     setSelectedStatus(null);
     setSelectedAttendees([]);
-    setAttendeeInputValue('');
     onCancel();
   };
 
@@ -174,30 +120,21 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           label="리딩자"
           rules={[{ required: true, message: '모임 리딩자를 입력해주세요' }]}
         >
-          <AutoComplete
-            options={leaderOptions}
+          <MemberAutoComplete
             placeholder="리딩자 닉네임을 입력하세요"
-            onSearch={getLeaderOptions}
-            onSelect={(value, option) => {
-              form.setFieldValue('leader_id', option.memberId);
+            onSelect={memberData => {
+              form.setFieldValue('leader_id', memberData.memberId);
             }}
-            filterOption={false}
-            notFoundContent="일치하는 회원이 없습니다"
-          >
-            <Input
-              onChange={e => {
-                const nickname = e.target.value;
-                const memberId = findMemberIdByNickname(nickname);
-                if (memberId) {
-                  // 폼에 leader_id 필드도 설정
-                  form.setFieldValue('leader_id', memberId);
-                } else if (nickname) {
-                  console.warn('Member not found for nickname:', nickname);
-                  form.setFieldValue('leader_id', null);
-                }
-              }}
-            />
-          </AutoComplete>
+            onChange={nickname => {
+              const member = members.find(m => m.nickname === nickname);
+              if (member) {
+                form.setFieldValue('leader_id', member.id);
+              } else if (nickname) {
+                console.warn('Member not found for nickname:', nickname);
+                form.setFieldValue('leader_id', null);
+              }
+            }}
+          />
         </Form.Item>
 
         {/* leader_id를 values에 포함시키기 위한 hidden 필드 */}
@@ -270,90 +207,12 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         {selectedStatus === '완료' && (
           <>
             <Form.Item label="참가자 명단">
-              <AutoComplete
-                value={attendeeInputValue}
-                options={attendeeOptions}
-                onSearch={value => {
-                  setAttendeeInputValue(value);
-                  getAttendeeOptions(value);
-                }}
-                onSelect={(value, option) => {
-                  const currentAttendees =
-                    form.getFieldValue('attendees') || [];
-
-                  // 중복 참가자 체크
-                  const isDuplicate = currentAttendees.some(
-                    attendee => attendee.memberId === option.memberId
-                  );
-
-                  if (!isDuplicate) {
-                    const newAttendees = [
-                      ...currentAttendees,
-                      {
-                        nickname: value,
-                        memberId: option.memberId,
-                        donationPaid: false,
-                        donationAmount: 0,
-                      },
-                    ];
-                    form.setFieldValue('attendees', newAttendees);
-                    setSelectedAttendees(newAttendees);
-                  }
-
-                  // 입력 필드 초기화
-                  setAttendeeInputValue('');
-                  setAttendeeOptions([]);
-                }}
-                filterOption={false}
-                notFoundContent="일치하는 회원이 없습니다"
-              >
-                <Input placeholder="참가자 닉네임을 입력하세요" />
-              </AutoComplete>
-
-              {/* 선택된 참가자 리스트 표시 */}
-              {selectedAttendees.length > 0 && (
-                <div style={{ marginTop: '8px' }}>
-                  <div
-                    style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
-                  >
-                    {selectedAttendees.map((attendee, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          background: '#f0f0f0',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <span>{attendee.nickname}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newAttendees = selectedAttendees.filter(
-                              (_, i) => i !== index
-                            );
-                            setSelectedAttendees(newAttendees);
-                            form.setFieldValue('attendees', newAttendees);
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#999',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <AttendeeManager
+                attendees={selectedAttendees}
+                onAttendeesChange={setSelectedAttendees}
+                form={form}
+                fieldName="attendees"
+              />
             </Form.Item>
 
             {/* 숨겨진 attendees 필드 */}

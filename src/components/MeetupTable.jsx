@@ -27,6 +27,8 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { useEvents } from '../hooks/useEvents';
+import MemberAutoComplete from './MemberAutoComplete';
+import AttendeeManager from './AttendeeManager';
 import moment from 'moment';
 
 const { Option } = Select;
@@ -37,7 +39,10 @@ const MeetupTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingMeetup, setEditingMeetup] = useState(null);
   const [selectedMeetup, setSelectedMeetup] = useState(null);
+  const [isEditingAll, setIsEditingAll] = useState(false);
+  const [tempAttendees, setTempAttendees] = useState([]);
   const [form] = Form.useForm();
+  const [editAllForm] = Form.useForm();
   const { events, addEvent, updateEvent } = useEvents();
 
   // 선택된 모임이 변경될 때 상세 정보로 스크롤 이동
@@ -84,6 +89,16 @@ const MeetupTable = () => {
 
       if (editingMeetup) {
         await updateEvent(editingMeetup.id, meetupData);
+        // 선택된 모임이 수정된 경우 상세 정보도 업데이트
+        if (selectedMeetup && selectedMeetup.id === editingMeetup.id) {
+          setSelectedMeetup({
+            ...selectedMeetup,
+            resource: {
+              ...selectedMeetup.resource,
+              ...meetupData,
+            },
+          });
+        }
       } else {
         await addEvent(meetupData);
       }
@@ -97,7 +112,74 @@ const MeetupTable = () => {
 
   const handleModalCancel = () => {
     setIsModalVisible(false);
+    setEditingMeetup(null);
     form.resetFields();
+  };
+
+  const handleEditAll = () => {
+    setIsEditingAll(true);
+    // 현재 선택된 모임의 데이터로 폼 초기화
+    const meetupData = selectedMeetup.resource;
+    editAllForm.setFieldsValue({
+      title: meetupData.title,
+      date: meetupData.date ? moment(meetupData.date) : null,
+      start_time: meetupData.start_time
+        ? moment(meetupData.start_time, 'HH:mm:ss')
+        : null,
+      leader_nickname: meetupData.leader_nickname,
+      type: meetupData.type,
+      level: meetupData.level,
+      status: meetupData.status,
+      course: meetupData.course,
+      cancel_reason: meetupData.cancel_reason,
+      review: meetupData.review,
+    });
+    // 참가자 데이터도 임시 상태로 복사
+    setTempAttendees([...(meetupData.attendees || [])]);
+  };
+
+  const handleSaveAll = async () => {
+    try {
+      const values = await editAllForm.validateFields();
+
+      const meetupData = {
+        title: values.title,
+        date: values.date ? values.date.format('YYYY-MM-DD') : null,
+        start_time: values.start_time
+          ? values.start_time.format('HH:mm:ss')
+          : null,
+        leader_nickname: values.leader_nickname,
+        type: values.type,
+        level: values.level,
+        status: values.status,
+        course: values.course,
+        cancel_reason: values.cancel_reason,
+        review: values.review,
+        attendees: tempAttendees,
+      };
+
+      await updateEvent(selectedMeetup.id, meetupData);
+
+      // 선택된 모임 정보 업데이트
+      setSelectedMeetup({
+        ...selectedMeetup,
+        resource: {
+          ...selectedMeetup.resource,
+          ...meetupData,
+        },
+      });
+
+      setIsEditingAll(false);
+      editAllForm.resetFields();
+    } catch (error) {
+      console.error('Form validation failed:', error);
+    }
+  };
+
+  const handleCancelAll = () => {
+    setIsEditingAll(false);
+    editAllForm.resetFields();
+    setTempAttendees([]);
   };
 
   const columns = [
@@ -113,6 +195,9 @@ const MeetupTable = () => {
       key: 'date',
       width: 120,
       render: date => moment(date).format('YYYY-MM-DD'),
+      sorter: (a, b) =>
+        moment(b.resource.date).valueOf() - moment(a.resource.date).valueOf(),
+      defaultSortOrder: 'descending',
     },
     {
       title: '시간',
@@ -220,80 +305,228 @@ const MeetupTable = () => {
             </Space>
           }
           style={{ marginTop: '24px' }}
-          extra={<Button onClick={() => setSelectedMeetup(null)}>닫기</Button>}
+          extra={
+            <Space>
+              {isEditingAll ? (
+                <>
+                  <Button type="primary" onClick={handleSaveAll}>
+                    저장
+                  </Button>
+                  <Button onClick={handleCancelAll}>취소</Button>
+                </>
+              ) : (
+                <Button onClick={handleEditAll}>수정</Button>
+              )}
+              <Button onClick={() => setSelectedMeetup(null)}>닫기</Button>
+            </Space>
+          }
         >
           <Row gutter={[24, 24]}>
             <Col xs={24} lg={16}>
               <Descriptions column={2} bordered>
                 <Descriptions.Item label="제목" span={2}>
-                  {selectedMeetup.resource.title}
+                  {isEditingAll ? (
+                    <Form
+                      form={editAllForm}
+                      layout="inline"
+                      style={{ width: '100%' }}
+                    >
+                      <Form.Item
+                        name="title"
+                        rules={[
+                          { required: true, message: '제목을 입력해주세요' },
+                        ]}
+                        style={{ flex: 1 }}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <span>{selectedMeetup.resource.title}</span>
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="날짜">
                   <Space>
                     <CalendarOutlined />
-                    {moment(selectedMeetup.resource.date).format('YYYY-MM-DD')}
+                    {isEditingAll ? (
+                      <Form form={editAllForm} layout="inline">
+                        <Form.Item
+                          name="date"
+                          rules={[
+                            { required: true, message: '날짜를 선택해주세요' },
+                          ]}
+                        >
+                          <DatePicker />
+                        </Form.Item>
+                      </Form>
+                    ) : (
+                      <span>
+                        {moment(selectedMeetup.resource.date).format(
+                          'YYYY-MM-DD'
+                        )}
+                      </span>
+                    )}
                   </Space>
                 </Descriptions.Item>
                 <Descriptions.Item label="시간">
                   <Space>
                     <ClockCircleOutlined />
-                    {selectedMeetup.resource.start_time || '미정'}
+                    {isEditingAll ? (
+                      <Form form={editAllForm} layout="inline">
+                        <Form.Item name="start_time">
+                          <TimePicker format="HH:mm" />
+                        </Form.Item>
+                      </Form>
+                    ) : (
+                      <span>
+                        {selectedMeetup.resource.start_time || '미정'}
+                      </span>
+                    )}
                   </Space>
                 </Descriptions.Item>
                 <Descriptions.Item label="리딩자">
                   <Space>
                     <UserOutlined />
-                    {selectedMeetup.resource.leader_nickname}
+                    {isEditingAll ? (
+                      <Form form={editAllForm} layout="inline">
+                        <Form.Item
+                          name="leader_nickname"
+                          rules={[
+                            {
+                              required: true,
+                              message: '리딩자를 입력해주세요',
+                            },
+                          ]}
+                        >
+                          <MemberAutoComplete
+                            placeholder="리딩자 닉네임을 입력하세요"
+                            style={{ width: 200 }}
+                          />
+                        </Form.Item>
+                      </Form>
+                    ) : (
+                      <span>{selectedMeetup.resource.leader_nickname}</span>
+                    )}
                   </Space>
                 </Descriptions.Item>
                 <Descriptions.Item label="활동 유형">
-                  <Tag
-                    color={
-                      selectedMeetup.resource.type === '등산'
-                        ? 'blue'
-                        : selectedMeetup.resource.type === '산책'
-                          ? 'green'
-                          : selectedMeetup.resource.type === '러닝'
-                            ? 'orange'
-                            : 'default'
-                    }
-                  >
-                    {selectedMeetup.resource.type}
-                  </Tag>
+                  {isEditingAll ? (
+                    <Form form={editAllForm} layout="inline">
+                      <Form.Item
+                        name="type"
+                        rules={[
+                          {
+                            required: true,
+                            message: '활동 유형을 선택해주세요',
+                          },
+                        ]}
+                      >
+                        <Select style={{ width: 120 }}>
+                          <Option value="등산">등산</Option>
+                          <Option value="산책">산책</Option>
+                          <Option value="러닝">러닝</Option>
+                          <Option value="기타">기타</Option>
+                        </Select>
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <Tag
+                      color={
+                        selectedMeetup.resource.type === '등산'
+                          ? 'blue'
+                          : selectedMeetup.resource.type === '산책'
+                            ? 'green'
+                            : selectedMeetup.resource.type === '러닝'
+                              ? 'orange'
+                              : 'default'
+                      }
+                    >
+                      {selectedMeetup.resource.type}
+                    </Tag>
+                  )}
                 </Descriptions.Item>
-                {selectedMeetup.resource.level && (
-                  <Descriptions.Item label="난이도">
-                    {selectedMeetup.resource.level}
-                  </Descriptions.Item>
-                )}
+                <Descriptions.Item label="난이도">
+                  {isEditingAll ? (
+                    <Form form={editAllForm} layout="inline">
+                      <Form.Item name="level">
+                        <Select
+                          placeholder="난이도를 선택하세요"
+                          style={{ width: 120 }}
+                        >
+                          <Option value="초급">초급</Option>
+                          <Option value="중급">중급</Option>
+                          <Option value="고급">고급</Option>
+                        </Select>
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <span>{selectedMeetup.resource.level || '-'}</span>
+                  )}
+                </Descriptions.Item>
                 <Descriptions.Item label="상태">
-                  <Tag
-                    color={
-                      selectedMeetup.resource.status === '완료'
-                        ? 'green'
-                        : selectedMeetup.resource.status === '취소'
-                          ? 'red'
-                          : 'blue'
-                    }
-                  >
-                    {selectedMeetup.resource.status}
-                  </Tag>
+                  {isEditingAll ? (
+                    <Form form={editAllForm} layout="inline">
+                      <Form.Item name="status">
+                        <Select style={{ width: 120 }}>
+                          <Option value="진행 전">진행 전</Option>
+                          <Option value="완료">완료</Option>
+                          <Option value="취소">취소</Option>
+                        </Select>
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <Tag
+                      color={
+                        selectedMeetup.resource.status === '완료'
+                          ? 'green'
+                          : selectedMeetup.resource.status === '취소'
+                            ? 'red'
+                            : 'blue'
+                      }
+                    >
+                      {selectedMeetup.resource.status}
+                    </Tag>
+                  )}
                 </Descriptions.Item>
-                {selectedMeetup.resource.course && (
-                  <Descriptions.Item label="설명" span={2}>
-                    {selectedMeetup.resource.course}
-                  </Descriptions.Item>
-                )}
-                {selectedMeetup.resource.cancel_reason && (
-                  <Descriptions.Item label="취소 사유" span={2}>
-                    {selectedMeetup.resource.cancel_reason}
-                  </Descriptions.Item>
-                )}
-                {selectedMeetup.resource.review && (
-                  <Descriptions.Item label="소감" span={2}>
-                    {selectedMeetup.resource.review}
-                  </Descriptions.Item>
-                )}
+                <Descriptions.Item label="설명" span={2}>
+                  {isEditingAll ? (
+                    <Form form={editAllForm} layout="vertical">
+                      <Form.Item name="course">
+                        <Input placeholder="설명을 입력하세요" />
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <span>{selectedMeetup.resource.course || '-'}</span>
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="취소 사유" span={2}>
+                  {isEditingAll ? (
+                    <Form form={editAllForm} layout="vertical">
+                      <Form.Item name="cancel_reason">
+                        <TextArea
+                          placeholder="취소 사유를 입력하세요"
+                          rows={3}
+                        />
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <span>{selectedMeetup.resource.cancel_reason || '-'}</span>
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="소감" span={2}>
+                  {isEditingAll ? (
+                    <Form form={editAllForm} layout="vertical">
+                      <Form.Item name="review">
+                        <TextArea
+                          placeholder="모임 소감을 입력하세요"
+                          rows={4}
+                        />
+                      </Form.Item>
+                    </Form>
+                  ) : (
+                    <span>{selectedMeetup.resource.review || '-'}</span>
+                  )}
+                </Descriptions.Item>
               </Descriptions>
             </Col>
 
@@ -302,13 +535,23 @@ const MeetupTable = () => {
                 title={
                   <Space>
                     <TeamOutlined />
-                    참가자 ({selectedMeetup.resource.attendees?.length || 0}명)
+                    참가자 (
+                    {isEditingAll
+                      ? tempAttendees.length
+                      : selectedMeetup.resource.attendees?.length || 0}
+                    명)
                   </Space>
                 }
                 size="small"
               >
-                {selectedMeetup.resource.attendees &&
-                selectedMeetup.resource.attendees.length > 0 ? (
+                {isEditingAll ? (
+                  <AttendeeManager
+                    attendees={tempAttendees}
+                    onAttendeesChange={setTempAttendees}
+                    disabled={false}
+                  />
+                ) : selectedMeetup.resource.attendees &&
+                  selectedMeetup.resource.attendees.length > 0 ? (
                   <List
                     dataSource={selectedMeetup.resource.attendees}
                     renderItem={attendee => (
