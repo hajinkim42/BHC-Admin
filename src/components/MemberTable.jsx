@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Table, Button, Space, Tag, Modal, Form, Input, Select } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import { useMembers } from '../hooks/useMembers';
 
 const { Option } = Select;
@@ -11,6 +16,27 @@ const MemberTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState('');
+
+  // 검색 필터링된 데이터
+  const filteredMembers = useMemo(() => {
+    if (!searchText.trim()) {
+      return members;
+    }
+
+    const searchLower = searchText.toLowerCase();
+    return members.filter(member => {
+      return (
+        (member.name && member.name.toLowerCase().includes(searchLower)) ||
+        (member.nickname &&
+          member.nickname.toLowerCase().includes(searchLower)) ||
+        (member.baby_name &&
+          member.baby_name.toLowerCase().includes(searchLower)) ||
+        (member.region && member.region.toLowerCase().includes(searchLower)) ||
+        (member.naver_id && member.naver_id.toLowerCase().includes(searchLower))
+      );
+    });
+  }, [members, searchText]);
 
   const columns = [
     {
@@ -28,10 +54,27 @@ const MemberTable = () => {
     {
       title: '닉네임',
       dataIndex: 'nickname',
-      key: 'email',
+      key: 'nickname',
       width: 200,
     },
-
+    {
+      title: '아기이름',
+      dataIndex: 'baby_name',
+      key: 'baby_name',
+      width: 120,
+    },
+    {
+      title: '지역',
+      dataIndex: 'region',
+      key: 'region',
+      width: 120,
+    },
+    {
+      title: 'Naver ID',
+      dataIndex: 'naver_id',
+      key: 'naver_id',
+      width: 150,
+    },
     {
       title: '가입일',
       dataIndex: 'joined_at',
@@ -122,9 +165,20 @@ const MemberTable = () => {
         </Button>
       </div>
 
+      <div style={{ marginBottom: '16px' }}>
+        <Input
+          placeholder="이름, 닉네임, 아기이름, 지역, Naver ID로 검색..."
+          prefix={<SearchOutlined />}
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
+          allowClear
+          style={{ width: '100%', maxWidth: '400px' }}
+        />
+      </div>
+
       <Table
         columns={columns}
-        dataSource={members}
+        dataSource={filteredMembers}
         loading={loading}
         rowKey="id"
         pagination={{
@@ -145,11 +199,7 @@ const MemberTable = () => {
         onCancel={handleModalCancel}
         width={600}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ status: 'active' }}
-        >
+        <Form form={form} layout="vertical">
           <Form.Item
             name="name"
             label="이름"
@@ -159,33 +209,31 @@ const MemberTable = () => {
           </Form.Item>
 
           <Form.Item
-            name="email"
-            label="이메일"
-            rules={[
-              { required: true, message: '이메일을 입력해주세요' },
-              { type: 'email', message: '올바른 이메일 형식을 입력해주세요' },
-            ]}
+            name="nickname"
+            label="닉네임"
+            rules={[{ required: true, message: '닉네임을 입력해주세요' }]}
           >
-            <Input placeholder="이메일을 입력하세요" />
+            <Input placeholder="닉네임을 입력하세요" />
           </Form.Item>
 
           <Form.Item
-            name="phone"
-            label="전화번호"
-            rules={[{ required: true, message: '전화번호를 입력해주세요' }]}
+            name="baby_name"
+            label="아기이름"
+            rules={[{ required: true, message: '아기이름을 입력해주세요' }]}
           >
-            <Input placeholder="전화번호를 입력하세요" />
+            <Input placeholder="아기이름을 입력하세요" />
           </Form.Item>
 
           <Form.Item
-            name="status"
-            label="상태"
-            rules={[{ required: true, message: '상태를 선택해주세요' }]}
+            name="region"
+            label="지역"
+            rules={[{ required: true, message: '지역을 입력해주세요' }]}
           >
-            <Select placeholder="상태를 선택하세요">
-              <Option value="active">활성</Option>
-              <Option value="inactive">비활성</Option>
-            </Select>
+            <Input placeholder="지역을 입력하세요" />
+          </Form.Item>
+
+          <Form.Item name="naver_id" label="Naver ID">
+            <Input placeholder="Naver ID를 입력하세요 (선택사항)" />
           </Form.Item>
         </Form>
       </Modal>
