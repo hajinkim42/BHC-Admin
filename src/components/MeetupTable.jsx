@@ -191,15 +191,19 @@ const MeetupTable = () => {
       width: 120,
       render: date => moment(date).format('YYYY-MM-DD'),
       sorter: (a, b) =>
-        moment(b.resource.date).valueOf() - moment(a.resource.date).valueOf(),
-      defaultSortOrder: 'descending',
+        moment(a.resource.date).valueOf() - moment(b.resource.date).valueOf(),
+      defaultSortOrder: 'ascending',
     },
     {
       title: '시간',
       dataIndex: ['resource', 'start_time'],
       key: 'start_time',
       width: 100,
-      render: time => time || '-',
+      render: time => {
+        if (!time) return '-';
+        // HH:mm:ss 형식을 HH:mm으로 변환
+        return time.substring(0, 5);
+      },
     },
     {
       title: '리딩자',
@@ -369,12 +373,14 @@ const MeetupTable = () => {
                     {isEditingAll ? (
                       <Form form={editAllForm} layout="inline">
                         <Form.Item name="start_time">
-                          <TimePicker format="HH:mm" />
+                          <TimePicker format="HH:mm" minuteStep={5} />
                         </Form.Item>
                       </Form>
                     ) : (
                       <span>
-                        {selectedMeetup.resource.start_time || '미정'}
+                        {selectedMeetup.resource.start_time
+                          ? selectedMeetup.resource.start_time.substring(0, 5)
+                          : '미정'}
                       </span>
                     )}
                   </Space>

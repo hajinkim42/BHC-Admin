@@ -27,6 +27,7 @@ const MeetupFormModal = ({
   showAttendeeManager = true,
   showLevelField = true,
   showStatusFields = true,
+  selectedDate = null,
 }) => {
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState(null);
@@ -57,7 +58,7 @@ const MeetupFormModal = ({
     onCancel();
   };
 
-  // editingEvent가 변경될 때 폼 데이터 설정
+  // editingEvent나 selectedDate가 변경될 때 폼 데이터 설정
   useEffect(() => {
     if (editingEvent) {
       const meetup = editingEvent.resource;
@@ -83,8 +84,9 @@ const MeetupFormModal = ({
       setSelectedAttendees(meetup.attendees || []);
     } else {
       // 새 이벤트 생성 시 기본값 설정
+      const defaultDate = selectedDate ? moment(selectedDate) : moment();
       form.setFieldsValue({
-        date: moment(),
+        date: defaultDate,
         start_time: moment('09:00', 'HH:mm'),
         status: 'pending',
         total_donation: 0,
@@ -92,7 +94,7 @@ const MeetupFormModal = ({
       setSelectedType(null);
       setSelectedStatus('pending');
     }
-  }, [editingEvent, form]);
+  }, [editingEvent, selectedDate, form]);
 
   return (
     <Modal
@@ -158,11 +160,11 @@ const MeetupFormModal = ({
           label="날짜"
           rules={[{ required: true, message: '날짜를 선택해주세요' }]}
         >
-          <DatePicker style={{ width: '100%' }} />
+          <DatePicker></DatePicker>
         </Form.Item>
 
         <Form.Item name="start_time" label="시간">
-          <TimePicker style={{ width: '100%' }} format="HH:mm" />
+          <TimePicker style={{ width: '100%' }} format="HH:mm" minuteStep={5} />
         </Form.Item>
 
         <Form.Item name="course" label="설명">

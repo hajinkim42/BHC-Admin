@@ -12,9 +12,11 @@ function Schedule() {
   const { events, addEvent, updateEvent, deleteEvent } = useEvents();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
 
-  const handleSelectSlot = () => {
+  const handleSelectSlot = slotInfo => {
     setEditingEvent(null);
+    setSelectedDate(slotInfo.start);
     setIsModalVisible(true);
   };
 
@@ -57,12 +59,14 @@ function Schedule() {
   const handleModalCancel = () => {
     setIsModalVisible(false);
     setEditingEvent(null);
+    setSelectedDate(null);
   };
 
   const handleDelete = async eventId => {
     await deleteEvent(eventId);
     setIsModalVisible(false);
     setEditingEvent(null);
+    setSelectedDate(null);
   };
 
   return (
@@ -83,6 +87,7 @@ function Schedule() {
           icon={<PlusOutlined />}
           onClick={() => {
             setEditingEvent(null);
+            setSelectedDate(null);
             setIsModalVisible(true);
           }}
         >
@@ -116,6 +121,7 @@ function Schedule() {
         showAttendeeManager={true}
         showLevelField={true}
         showStatusFields={true}
+        selectedDate={selectedDate}
       />
     </Layout>
   );
