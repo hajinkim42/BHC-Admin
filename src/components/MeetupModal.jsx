@@ -16,7 +16,18 @@ import AttendeeManager from './AttendeeManager';
 const { Option } = Select;
 const { TextArea } = Input;
 
-const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
+const MeetupFormModal = ({
+  isVisible,
+  onCancel,
+  onOk,
+  editingEvent,
+  onDelete,
+  title = null,
+  showDeleteButton = true,
+  showAttendeeManager = true,
+  showLevelField = true,
+  showStatusFields = true,
+}) => {
   const [form] = Form.useForm();
   const [selectedType, setSelectedType] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
@@ -85,7 +96,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
 
   return (
     <Modal
-      title={editingEvent ? '일정 수정' : '일정 추가'}
+      title={title || (editingEvent ? '일정 수정' : '일정 추가')}
       open={isVisible}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -175,7 +186,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         </Form.Item>
 
         {/* 등산일 때만 난이도 표시 */}
-        {selectedType === '등산' && (
+        {showLevelField && selectedType === '등산' && (
           <Form.Item
             name="level"
             label="난이도"
@@ -189,35 +200,63 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
           </Form.Item>
         )}
 
-        {/* 일정 완료 관련 필드들 */}
-        <Form.Item name="status" label="모임 진행 상태">
-          <Select>
-            <Option value="진행 전">진행 전</Option>
-            <Option value="완료">완료</Option>
-            <Option value="취소">취소</Option>
-          </Select>
-        </Form.Item>
+        {/* 난이도 필드가 항상 표시되어야 하는 경우 */}
+        {showLevelField && selectedType !== '등산' && (
+          <Form.Item name="level" label="난이도">
+            <Select placeholder="난이도를 선택하세요">
+              <Option value="초급">초급</Option>
+              <Option value="중급">중급</Option>
+              <Option value="고급">고급</Option>
+            </Select>
+          </Form.Item>
+        )}
 
-        {selectedStatus === '취소' && (
+        {/* 일정 완료 관련 필드들 */}
+        {showStatusFields && (
+          <Form.Item name="status" label="모임 진행 상태">
+            <Select>
+              <Option value="진행 전">진행 전</Option>
+              <Option value="완료">완료</Option>
+              <Option value="취소">취소</Option>
+            </Select>
+          </Form.Item>
+        )}
+
+        {showStatusFields && selectedStatus === '취소' && (
           <Form.Item name="cancel_reason" label="취소 사유">
             <TextArea placeholder="취소 사유를 입력하세요" rows={3} />
           </Form.Item>
         )}
 
-        {selectedStatus === '완료' && (
-          <>
-            <Form.Item label="참가자 명단">
-              <AttendeeManager
-                attendees={selectedAttendees}
-                onAttendeesChange={setSelectedAttendees}
-                form={form}
-                fieldName="attendees"
-              />
-            </Form.Item>
+        {showStatusFields &&
+          selectedStatus === '완료' &&
+          showAttendeeManager && (
+            <>
+              <Form.Item label="참가자 명단">
+                <AttendeeManager
+                  attendees={selectedAttendees}
+                  onAttendeesChange={setSelectedAttendees}
+                  form={form}
+                  fieldName="attendees"
+                />
+              </Form.Item>
 
-            {/* 숨겨진 attendees 필드 */}
-            <Form.Item name="attendees" style={{ display: 'none' }}>
-              <Input type="hidden" />
+              {/* 숨겨진 attendees 필드 */}
+              <Form.Item name="attendees" style={{ display: 'none' }}>
+                <Input type="hidden" />
+              </Form.Item>
+
+              <Form.Item name="review" label="소감">
+                <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
+              </Form.Item>
+            </>
+          )}
+
+        {/* 상태 필드가 표시되지 않는 경우 기본 필드들 */}
+        {!showStatusFields && (
+          <>
+            <Form.Item name="cancel_reason" label="취소 사유">
+              <TextArea placeholder="취소 사유를 입력하세요" rows={3} />
             </Form.Item>
 
             <Form.Item name="review" label="소감">
@@ -227,7 +266,7 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
         )}
       </Form>
 
-      {editingEvent && (
+      {editingEvent && showDeleteButton && (
         <div style={{ marginTop: '16px', textAlign: 'right' }}>
           <Button
             danger
@@ -252,4 +291,4 @@ const MeetupModal = ({ isVisible, onCancel, onOk, editingEvent, onDelete }) => {
   );
 };
 
-export default MeetupModal;
+export default MeetupFormModal;

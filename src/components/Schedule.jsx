@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Layout, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import Calendar from './Calendar';
-import MeetupModal from './MeetupModal';
+import MeetupFormModal from './MeetupModal';
 import { useEvents } from '../hooks/useEvents';
 import { getEventStyle } from '../utils/eventStyles';
 
@@ -105,12 +105,17 @@ function Schedule() {
         />
       </Content>
 
-      <MeetupModal
+      <MeetupFormModal
         isVisible={isModalVisible}
         onCancel={handleModalCancel}
         onOk={handleModalOk}
         editingEvent={editingEvent}
         onDelete={handleDelete}
+        title={editingEvent ? '일정 수정' : '일정 추가'}
+        showDeleteButton={true}
+        showAttendeeManager={true}
+        showLevelField={true}
+        showStatusFields={true}
       />
     </Layout>
   );

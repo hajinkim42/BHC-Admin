@@ -29,6 +29,7 @@ import {
 import { useEvents } from '../hooks/useEvents';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
+import MeetupFormModal from './MeetupModal';
 import moment from 'moment';
 
 const { Option } = Select;
@@ -41,7 +42,6 @@ const MeetupTable = () => {
   const [selectedMeetup, setSelectedMeetup] = useState(null);
   const [isEditingAll, setIsEditingAll] = useState(false);
   const [tempAttendees, setTempAttendees] = useState([]);
-  const [form] = Form.useForm();
   const [editAllForm] = Form.useForm();
   const { events, addEvent, updateEvent } = useEvents();
 
@@ -62,14 +62,11 @@ const MeetupTable = () => {
 
   const handleAdd = () => {
     setEditingMeetup(null);
-    form.resetFields();
     setIsModalVisible(true);
   };
 
-  const handleModalOk = async () => {
+  const handleModalOk = async values => {
     try {
-      const values = await form.validateFields();
-
       const meetupData = {
         date: values.date.format('YYYY-MM-DD'),
         start_time: values.start_time
@@ -104,7 +101,6 @@ const MeetupTable = () => {
       }
 
       setIsModalVisible(false);
-      form.resetFields();
     } catch (error) {
       console.error('Form validation failed:', error);
     }
@@ -113,7 +109,6 @@ const MeetupTable = () => {
   const handleModalCancel = () => {
     setIsModalVisible(false);
     setEditingMeetup(null);
-    form.resetFields();
   };
 
   const handleEditAll = () => {
@@ -572,92 +567,17 @@ const MeetupTable = () => {
         </Card>
       )}
 
-      <Modal
-        title={editingMeetup ? '모임 수정' : '모임 추가'}
-        open={isModalVisible}
-        onOk={handleModalOk}
+      <MeetupFormModal
+        isVisible={isModalVisible}
         onCancel={handleModalCancel}
-        width={600}
-        okText="저장"
-        cancelText="취소"
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{
-            status: '진행 전',
-          }}
-        >
-          <Form.Item
-            name="title"
-            label="제목"
-            rules={[{ required: true, message: '제목을 입력해주세요' }]}
-          >
-            <Input placeholder="제목을 입력하세요" />
-          </Form.Item>
-
-          <Form.Item
-            name="leader_nickname"
-            label="리딩자"
-            rules={[{ required: true, message: '모임 리딩자를 입력해주세요' }]}
-          >
-            <Input placeholder="리딩자 닉네임을 입력하세요" />
-          </Form.Item>
-
-          <Form.Item
-            name="date"
-            label="날짜"
-            rules={[{ required: true, message: '날짜를 선택해주세요' }]}
-          >
-            <DatePicker style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item name="start_time" label="시간">
-            <TimePicker style={{ width: '100%' }} format="HH:mm" />
-          </Form.Item>
-
-          <Form.Item name="course" label="설명">
-            <Input placeholder="설명을 입력하세요(선택사항)" />
-          </Form.Item>
-
-          <Form.Item
-            name="type"
-            label="활동 유형"
-            rules={[{ required: true, message: '활동 유형을 선택해주세요' }]}
-          >
-            <Select placeholder="활동 유형을 선택하세요">
-              <Option value="등산">등산</Option>
-              <Option value="산책">산책</Option>
-              <Option value="러닝">러닝</Option>
-              <Option value="기타">기타</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="level" label="난이도">
-            <Select placeholder="난이도를 선택하세요">
-              <Option value="초급">초급</Option>
-              <Option value="중급">중급</Option>
-              <Option value="고급">고급</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="status" label="모임 진행 상태">
-            <Select>
-              <Option value="진행 전">진행 전</Option>
-              <Option value="완료">완료</Option>
-              <Option value="취소">취소</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="cancel_reason" label="취소 사유">
-            <TextArea placeholder="취소 사유를 입력하세요" rows={3} />
-          </Form.Item>
-
-          <Form.Item name="review" label="소감">
-            <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onOk={handleModalOk}
+        editingEvent={editingMeetup}
+        title={editingMeetup ? '모임 수정' : '모임 추가'}
+        showDeleteButton={false}
+        showAttendeeManager={false}
+        showLevelField={true}
+        showStatusFields={true}
+      />
     </div>
   );
 };
