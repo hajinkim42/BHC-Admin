@@ -64,7 +64,6 @@ const MeetupFormModal = ({
   );
 
   useEffect(() => {
-    console.log('editingEvent', editingEvent);
     if (editingEvent) {
       form.setFieldsValue({
         title: editingEvent.resource.title,
@@ -148,7 +147,12 @@ const MeetupFormModal = ({
         </Form.Item>
 
         <Form.Item name="start_time" label="시간">
-          <TimePicker style={{ width: '100%' }} format="HH:mm" minuteStep={5} />
+          <TimePicker
+            style={{ width: '100%' }}
+            format="HH:mm"
+            minuteStep={5}
+            inputReadOnly
+          />
         </Form.Item>
 
         <Form.Item name="course" label="설명">

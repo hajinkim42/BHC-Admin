@@ -373,7 +373,11 @@ const MeetupTable = () => {
                     {isEditingAll ? (
                       <Form form={editAllForm} layout="inline">
                         <Form.Item name="start_time">
-                          <TimePicker format="HH:mm" minuteStep={5} />
+                          <TimePicker
+                            format="HH:mm"
+                            minuteStep={5}
+                            inputReadOnly
+                          />
                         </Form.Item>
                       </Form>
                     ) : (
