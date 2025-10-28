@@ -1,14 +1,14 @@
-import { Calendar as RBCalendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'moment/locale/ko';
+import { Calendar as RBCalendar } from 'react-big-calendar';
+import { dayjsLocalizer } from 'react-big-calendar/lib/localizers/dayjs';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './Calendar.css';
+import dayjs from 'dayjs';
 
-// moment 로컬라이저 설정
-const localizer = momentLocalizer(moment);
+// 로컬라이저 설정
+const localizer = dayjsLocalizer(dayjs);
 
 // 한국어 설정
-moment.locale('ko');
+dayjs.locale('ko');
 
 const Calendar = ({ events, onSelectSlot, onSelectEvent, eventPropGetter }) => {
   return (

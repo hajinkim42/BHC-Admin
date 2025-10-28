@@ -30,7 +30,7 @@ import { useEvents } from '../hooks/useEvents';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
 import MeetupFormModal from './MeetupModal';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -117,9 +117,9 @@ const MeetupTable = () => {
     const meetupData = selectedMeetup.resource;
     editAllForm.setFieldsValue({
       title: meetupData.title,
-      date: meetupData.date ? moment(meetupData.date) : null,
+      date: meetupData.date ? dayjs(meetupData.date) : null,
       start_time: meetupData.start_time
-        ? moment(meetupData.start_time, 'HH:mm:ss')
+        ? dayjs(meetupData.start_time, 'HH:mm:ss')
         : null,
       leader_nickname: meetupData.leader_nickname,
       type: meetupData.type,
@@ -189,9 +189,9 @@ const MeetupTable = () => {
       dataIndex: ['resource', 'date'],
       key: 'date',
       width: 120,
-      render: date => moment(date).format('YYYY-MM-DD'),
+      render: date => dayjs(date).format('YYYY-MM-DD'),
       sorter: (a, b) =>
-        moment(a.resource.date).valueOf() - moment(b.resource.date).valueOf(),
+        dayjs(a.resource.date).valueOf() - dayjs(b.resource.date).valueOf(),
       defaultSortOrder: 'ascending',
     },
     {
@@ -360,7 +360,7 @@ const MeetupTable = () => {
                       </Form>
                     ) : (
                       <span>
-                        {moment(selectedMeetup.resource.date).format(
+                        {dayjs(selectedMeetup.resource.date).format(
                           'YYYY-MM-DD'
                         )}
                       </span>

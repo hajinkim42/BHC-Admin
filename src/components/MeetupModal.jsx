@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Modal,
   Form,
@@ -8,7 +8,7 @@ import {
   TimePicker,
   Button,
 } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useMembers } from '../hooks/useMembers';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
@@ -58,43 +58,36 @@ const MeetupFormModal = ({
     onCancel();
   };
 
-  // editingEvent나 selectedDate가 변경될 때 폼 데이터 설정
+  const defaultDate = useMemo(
+    () => (selectedDate ? dayjs(selectedDate) : dayjs()),
+    [selectedDate]
+  );
+
   useEffect(() => {
+    console.log('editingEvent', editingEvent);
     if (editingEvent) {
-      const meetup = editingEvent.resource;
       form.setFieldsValue({
-        date: moment(meetup.date),
-        start_time: meetup.start_time
-          ? moment(meetup.start_time, 'HH:mm:ss')
-          : null,
-        title: meetup.title,
-        leader_nickname: meetup.leader_nickname,
-        leader_id: meetup.leader_id,
-        course: meetup.course,
-        type: meetup.type,
-        level: meetup.level,
-        status: meetup.status,
-        cancel_reason: meetup.cancel_reason,
-        total_donation: meetup.total_donation,
-        attendees: meetup.attendees || [],
-        review: meetup.review,
+        title: editingEvent.resource.title,
+        leader_nickname: editingEvent.resource.leader_nickname,
+        leader_id: editingEvent.resource.leader_id,
+        course: editingEvent.resource.course,
+        type: editingEvent.resource.type,
+        level: editingEvent.resource.level,
+        status: editingEvent.resource.status,
+        cancel_reason: editingEvent.resource.cancel_reason,
+        review: editingEvent.resource.review,
+        date: dayjs(editingEvent.resource.date),
+        start_time: dayjs(editingEvent.resource.start_time, 'HH:mm:ss'),
       });
-      setSelectedType(meetup.type);
-      setSelectedStatus(meetup.status);
-      setSelectedAttendees(meetup.attendees || []);
     } else {
-      // 새 이벤트 생성 시 기본값 설정
-      const defaultDate = selectedDate ? moment(selectedDate) : moment();
       form.setFieldsValue({
         date: defaultDate,
-        start_time: moment('09:00', 'HH:mm'),
+        start_time: dayjs('09:00', 'HH:mm'),
         status: '진행 전',
         total_donation: 0,
       });
-      setSelectedType(null);
-      setSelectedStatus('진행 전');
     }
-  }, [editingEvent, selectedDate, form]);
+  }, [editingEvent, form, defaultDate]);
 
   return (
     <Modal
@@ -107,18 +100,9 @@ const MeetupFormModal = ({
       cancelText="취소"
     >
       <Form
+        key={editingEvent ? editingEvent.id : 'new'}
         form={form}
         layout="vertical"
-        initialValues={{
-          status: '진행 전',
-          total_donation: 0,
-        }}
-        onValuesChange={changedValues => {
-          // eslint-disable-next-line no-prototype-builtins
-          if (changedValues.hasOwnProperty('status')) {
-            setSelectedStatus(changedValues.status);
-          }
-        }}
       >
         <Form.Item
           name="title"
@@ -160,7 +144,7 @@ const MeetupFormModal = ({
           label="날짜"
           rules={[{ required: true, message: '날짜를 선택해주세요' }]}
         >
-          <DatePicker></DatePicker>
+          <DatePicker style={{ width: '100%' }} />
         </Form.Item>
 
         <Form.Item name="start_time" label="시간">
