@@ -43,7 +43,7 @@ const MeetupTable = () => {
   const [isEditingAll, setIsEditingAll] = useState(false);
   const [tempAttendees, setTempAttendees] = useState([]);
   const [editAllForm] = Form.useForm();
-  const { events, addEvent, updateEvent } = useEvents();
+  const { events, addEvent, updateEvent, deleteEvent } = useEvents();
 
   // 선택된 모임이 변경될 때 상세 정보로 스크롤 이동
   useEffect(() => {
@@ -177,6 +177,49 @@ const MeetupTable = () => {
     setTempAttendees([]);
   };
 
+  const handleDelete = async () => {
+    if (!selectedMeetup) return;
+
+    Modal.confirm({
+      title: '모임 삭제',
+      content: '정말로 이 모임을 삭제하시겠습니까?',
+      okText: '삭제',
+      cancelText: '취소',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await deleteEvent(selectedMeetup.id);
+          setSelectedMeetup(null);
+        } catch (error) {
+          console.error('Error deleting meetup:', error);
+        }
+      },
+    });
+  };
+
+  const handleRowClick = record => {
+    // 수정 중인 경우 확인 팝업 표시
+    if (isEditingAll) {
+      Modal.confirm({
+        title: '수정 중단',
+        content: '현재 수정 중입니다. 다른 모임을 선택하시겠습니까?',
+        okText: '예',
+        cancelText: '아니오',
+        onOk: () => {
+          // 수정 모드 종료
+          setIsEditingAll(false);
+          editAllForm.resetFields();
+          setTempAttendees([]);
+          // 새로운 모임 선택
+          setSelectedMeetup(record);
+        },
+      });
+    } else {
+      // 수정 중이 아닌 경우 바로 선택
+      setSelectedMeetup(record);
+    }
+  };
+
   const columns = [
     {
       title: '제목',
@@ -283,12 +326,11 @@ const MeetupTable = () => {
         dataSource={events}
         rowKey="id"
         onRow={record => ({
-          onClick: () => setSelectedMeetup(record),
+          onClick: () => handleRowClick(record),
           style: { cursor: 'pointer' },
         })}
         pagination={{
           pageSize: 5,
-          showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) => `${range[0]}-${range[1]} / ${total}개`,
         }}
@@ -316,7 +358,9 @@ const MeetupTable = () => {
               ) : (
                 <Button onClick={handleEditAll}>수정</Button>
               )}
-              <Button onClick={() => setSelectedMeetup(null)}>닫기</Button>
+              <Button danger onClick={handleDelete}>
+                삭제
+              </Button>
             </Space>
           }
         >
