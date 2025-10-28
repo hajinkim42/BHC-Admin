@@ -24,7 +24,6 @@ const MeetupFormModal = ({
   onDelete,
   title = null,
   showDeleteButton = true,
-  showAttendeeManager = true,
   showLevelField = true,
   showStatusFields = true,
   selectedDate = null,
@@ -77,7 +76,10 @@ const MeetupFormModal = ({
         review: editingEvent.resource.review,
         date: dayjs(editingEvent.resource.date),
         start_time: dayjs(editingEvent.resource.start_time, 'HH:mm:ss'),
+        attendees: editingEvent.resource.attendees || [],
       });
+      setSelectedStatus(editingEvent.resource.status);
+      setSelectedAttendees(editingEvent.resource.attendees || []);
     } else {
       form.setFieldsValue({
         date: defaultDate,
@@ -85,6 +87,8 @@ const MeetupFormModal = ({
         status: '진행 전',
         total_donation: 0,
       });
+      setSelectedStatus('진행 전');
+      setSelectedAttendees([]);
     }
   }, [editingEvent, form, defaultDate]);
 
@@ -102,6 +106,11 @@ const MeetupFormModal = ({
         key={editingEvent ? editingEvent.id : 'new'}
         form={form}
         layout="vertical"
+        onValuesChange={changedValues => {
+          if (changedValues.status !== undefined) {
+            setSelectedStatus(changedValues.status);
+          }
+        }}
       >
         <Form.Item
           name="title"
@@ -207,29 +216,27 @@ const MeetupFormModal = ({
           </Form.Item>
         )}
 
-        {showStatusFields &&
-          selectedStatus === '완료' &&
-          showAttendeeManager && (
-            <>
-              <Form.Item label="참가자 명단">
-                <AttendeeManager
-                  attendees={selectedAttendees}
-                  onAttendeesChange={setSelectedAttendees}
-                  form={form}
-                  fieldName="attendees"
-                />
-              </Form.Item>
+        {selectedStatus === '완료' && (
+          <>
+            <Form.Item label="참가자 명단">
+              <AttendeeManager
+                attendees={selectedAttendees}
+                onAttendeesChange={setSelectedAttendees}
+                form={form}
+                fieldName="attendees"
+              />
+            </Form.Item>
 
-              {/* 숨겨진 attendees 필드 */}
-              <Form.Item name="attendees" style={{ display: 'none' }}>
-                <Input type="hidden" />
-              </Form.Item>
+            {/* 숨겨진 attendees 필드 */}
+            <Form.Item name="attendees" style={{ display: 'none' }}>
+              <Input type="hidden" />
+            </Form.Item>
 
-              <Form.Item name="review" label="소감">
-                <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
-              </Form.Item>
-            </>
-          )}
+            <Form.Item name="review" label="소감">
+              <TextArea placeholder="모임 소감을 입력하세요" rows={4} />
+            </Form.Item>
+          </>
+        )}
 
         {/* 상태 필드가 표시되지 않는 경우 기본 필드들 */}
         {!showStatusFields && (
