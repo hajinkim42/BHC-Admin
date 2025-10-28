@@ -88,11 +88,11 @@ const MeetupFormModal = ({
       form.setFieldsValue({
         date: defaultDate,
         start_time: moment('09:00', 'HH:mm'),
-        status: 'pending',
+        status: '진행 전',
         total_donation: 0,
       });
       setSelectedType(null);
-      setSelectedStatus('pending');
+      setSelectedStatus('진행 전');
     }
   }, [editingEvent, selectedDate, form]);
 
@@ -194,17 +194,6 @@ const MeetupFormModal = ({
             label="난이도"
             rules={[{ required: true, message: '난이도를 선택해주세요' }]}
           >
-            <Select placeholder="난이도를 선택하세요">
-              <Option value="초급">초급</Option>
-              <Option value="중급">중급</Option>
-              <Option value="고급">고급</Option>
-            </Select>
-          </Form.Item>
-        )}
-
-        {/* 난이도 필드가 항상 표시되어야 하는 경우 */}
-        {showLevelField && selectedType !== '등산' && (
-          <Form.Item name="level" label="난이도">
             <Select placeholder="난이도를 선택하세요">
               <Option value="초급">초급</Option>
               <Option value="중급">중급</Option>
