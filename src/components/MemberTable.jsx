@@ -1,25 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Modal, Form, Input, Select } from 'antd';
-import {
-  EditOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMembers } from '../hooks/useMembers';
 
 const { Option } = Select;
 
 const MemberTable = () => {
-  const { members, loading, addMember, updateMember, deleteMember } =
-    useMembers();
+  const { members, loading, addMember, updateMember } = useMembers();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 모바일 감지
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // 검색 필터링된 데이터
-  const filteredMembers = useMemo(() => {
+  const filteredMembers = (() => {
     if (!searchText.trim()) {
       return members;
     }
@@ -36,9 +43,16 @@ const MemberTable = () => {
         (member.naver_id && member.naver_id.toLowerCase().includes(searchLower))
       );
     });
-  }, [members, searchText]);
+  })();
 
-  const columns = [
+  const handleEdit = record => {
+    setEditingMember(record);
+    form.setFieldsValue(record);
+    setIsModalVisible(true);
+  };
+
+  // 모든 컬럼 정의
+  const allColumns = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -85,7 +99,7 @@ const MemberTable = () => {
     {
       title: '액션',
       key: 'action',
-      width: 150,
+      width: 100,
       render: (_, record) => (
         <Space size="small">
           <Button
@@ -96,32 +110,18 @@ const MemberTable = () => {
           >
             수정
           </Button>
-          <Button
-            danger
-            size="small"
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            삭제
-          </Button>
         </Space>
       ),
     },
   ];
 
-  const handleEdit = record => {
-    setEditingMember(record);
-    form.setFieldsValue(record);
-    setIsModalVisible(true);
-  };
-
-  const handleDelete = record => {
-    Modal.confirm({
-      title: '회원 삭제',
-      content: `${record.name} 회원을 삭제하시겠습니까?`,
-      onOk: () => deleteMember(record.id),
-    });
-  };
+  // 모바일에서는 '이름', '닉네임', '액션'만 표시
+  const columns = isMobile
+    ? allColumns.filter(
+        col =>
+          col.key === 'name' || col.key === 'nickname' || col.key === 'action'
+      )
+    : allColumns;
 
   const handleAdd = () => {
     setEditingMember(null);
@@ -180,7 +180,7 @@ const MemberTable = () => {
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} / 총 ${total}개`,
         }}
-        scroll={{ x: 800 }}
+        scroll={isMobile ? { x: 400 } : { x: 800 }}
         bordered
         size="small"
       />

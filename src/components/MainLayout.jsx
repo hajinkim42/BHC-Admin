@@ -51,7 +51,6 @@ const MainLayout = () => {
 
       {/* 모바일 드로어 메뉴 */}
       <Drawer
-        title="BHC 관리자"
         placement="left"
         onClose={() => setMobileMenuVisible(false)}
         open={mobileMenuVisible}
