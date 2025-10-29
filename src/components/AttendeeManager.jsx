@@ -82,7 +82,7 @@ const AttendeeManager = ({
               onChange={value => setAttendeeInputValue(value)}
               style={{ flex: 1 }}
             />
-            <Button
+            {/* <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => {
@@ -97,7 +97,7 @@ const AttendeeManager = ({
               }}
             >
               추가
-            </Button>
+            </Button> */}
           </Space.Compact>
         </div>
       )}
