@@ -152,7 +152,7 @@ const MeetupFormModal = ({
           label="날짜"
           rules={[{ required: true, message: '날짜를 선택해주세요' }]}
         >
-          <DatePicker style={{ width: '100%' }} />
+          <DatePicker style={{ width: '100%' }} inputReadOnly />
         </Form.Item>
 
         <Form.Item name="start_time" label="시간">
