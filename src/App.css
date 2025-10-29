@@ -91,6 +91,11 @@
     padding: 0 !important;
   }
 
+  /* 일정 관리 페이지 모바일 패딩 */
+  .schedule-content {
+    padding: 12px !important;
+  }
+
   /* 모바일에서 테이블 스크롤 처리 */
   .ant-table-wrapper {
     overflow-x: auto;

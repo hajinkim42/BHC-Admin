@@ -81,7 +81,6 @@ function Schedule() {
           borderBottom: '1px solid #f0f0f0',
         }}
       >
-        <h1 style={{ margin: 0, color: '#1890ff' }}>일정 관리</h1>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -96,6 +95,7 @@ function Schedule() {
       </Header>
 
       <Content
+        className="schedule-content"
         style={{
           padding: 24,
           background: '#fff',
