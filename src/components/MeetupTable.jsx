@@ -306,15 +306,8 @@ const MeetupTable = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div
-        style={{
-          marginBottom: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+    <div className="table-container">
+      <div className="table-header">
         <h2>모임 관리</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
           모임 추가
@@ -334,6 +327,8 @@ const MeetupTable = () => {
           showQuickJumper: true,
           showTotal: (total, range) => `${range[0]}-${range[1]} / ${total}개`,
         }}
+        scroll={{ x: 600 }}
+        size="small"
       />
 
       {selectedMeetup && (
@@ -364,10 +359,15 @@ const MeetupTable = () => {
             </Space>
           }
         >
-          <Row gutter={[24, 24]}>
+          <Row gutter={[16, 16]}>
             <Col xs={24} lg={16}>
-              <Descriptions column={2} bordered>
-                <Descriptions.Item label="제목" span={2}>
+              <Descriptions
+                column={1}
+                bordered
+                size="small"
+                className="meetup-descriptions"
+              >
+                <Descriptions.Item label="제목" span={1}>
                   {isEditingAll ? (
                     <Form
                       form={editAllForm}
@@ -537,7 +537,7 @@ const MeetupTable = () => {
                     </Tag>
                   )}
                 </Descriptions.Item>
-                <Descriptions.Item label="설명" span={2}>
+                <Descriptions.Item label="설명" span={1}>
                   {isEditingAll ? (
                     <Form form={editAllForm} layout="vertical">
                       <Form.Item name="course">
@@ -548,7 +548,7 @@ const MeetupTable = () => {
                     <span>{selectedMeetup.resource.course || '-'}</span>
                   )}
                 </Descriptions.Item>
-                <Descriptions.Item label="취소 사유" span={2}>
+                <Descriptions.Item label="취소 사유" span={1}>
                   {isEditingAll ? (
                     <Form form={editAllForm} layout="vertical">
                       <Form.Item name="cancel_reason">
@@ -562,7 +562,7 @@ const MeetupTable = () => {
                     <span>{selectedMeetup.resource.cancel_reason || '-'}</span>
                   )}
                 </Descriptions.Item>
-                <Descriptions.Item label="소감" span={2}>
+                <Descriptions.Item label="소감" span={1}>
                   {isEditingAll ? (
                     <Form form={editAllForm} layout="vertical">
                       <Form.Item name="review">

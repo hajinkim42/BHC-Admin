@@ -150,29 +150,21 @@ const MemberTable = () => {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '16px',
-        }}
-      >
-        <h2 style={{ margin: 0 }}>회원 관리</h2>
+    <div className="table-container">
+      <div className="table-header">
+        <h2>회원 관리</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
           회원 추가
         </Button>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
+      <div className="search-container">
         <Input
           placeholder="이름, 닉네임, 아기이름, 지역, Naver ID로 검색..."
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={e => setSearchText(e.target.value)}
           allowClear
-          style={{ width: '100%', maxWidth: '400px' }}
         />
       </div>
 
@@ -188,8 +180,9 @@ const MemberTable = () => {
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} / 총 ${total}개`,
         }}
-        // scroll={{ x: 800 }}
+        scroll={{ x: 800 }}
         bordered
+        size="small"
       />
 
       <Modal
