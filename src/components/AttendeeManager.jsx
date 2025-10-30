@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Form, Button, List, Avatar, Space } from 'antd';
 import { UserOutlined, PlusOutlined } from '@ant-design/icons';
 import MemberAutoComplete from './MemberAutoComplete';

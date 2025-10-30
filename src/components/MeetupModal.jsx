@@ -12,6 +12,10 @@ import dayjs from 'dayjs';
 import { useMembers } from '../hooks/useMembers';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
+import {
+  MEETUP_TYPE_OPTIONS,
+  MEETUP_LEVEL_OPTIONS,
+} from '../utils/meetupTypes';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -177,27 +181,29 @@ const MeetupFormModal = ({
             placeholder="활동 유형을 선택하세요"
             onChange={value => setSelectedType(value)}
           >
-            <Option value="등산">등산</Option>
-            <Option value="산책">산책</Option>
-            <Option value="러닝">러닝</Option>
-            <Option value="기타">기타</Option>
+            {MEETUP_TYPE_OPTIONS.map(option => (
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
+            ))}
           </Select>
         </Form.Item>
 
-        {/* 등산일 때만 난이도 표시 */}
-        {showLevelField && selectedType === '등산' && (
+        {
           <Form.Item
             name="level"
             label="난이도"
-            rules={[{ required: true, message: '난이도를 선택해주세요' }]}
+            rules={[{ required: false, message: '난이도를 선택해주세요' }]}
           >
             <Select placeholder="난이도를 선택하세요">
-              <Option value="초급">초급</Option>
-              <Option value="중급">중급</Option>
-              <Option value="고급">고급</Option>
+              {MEETUP_LEVEL_OPTIONS.map(option => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
-        )}
+        }
 
         {/* 일정 완료 관련 필드들 */}
         {showStatusFields && (

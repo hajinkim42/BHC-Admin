@@ -30,6 +30,11 @@ import { useEvents } from '../hooks/useEvents';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
 import MeetupFormModal from './MeetupModal';
+import {
+  MEETUP_TYPE_OPTIONS,
+  MEETUP_LEVEL_OPTIONS,
+  getTypeColor,
+} from '../utils/meetupTypes';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
@@ -259,21 +264,7 @@ const MeetupTable = () => {
       dataIndex: ['resource', 'type'],
       key: 'type',
       width: 100,
-      render: type => (
-        <Tag
-          color={
-            type === '등산'
-              ? 'blue'
-              : type === '산책'
-                ? 'green'
-                : type === '러닝'
-                  ? 'orange'
-                  : 'default'
-          }
-        >
-          {type}
-        </Tag>
-      ),
+      render: type => <Tag color={getTypeColor(type)}>{type}</Tag>,
     },
     {
       title: '난이도',
@@ -471,25 +462,16 @@ const MeetupTable = () => {
                         ]}
                       >
                         <Select style={{ width: 120 }}>
-                          <Option value="등산">등산</Option>
-                          <Option value="산책">산책</Option>
-                          <Option value="러닝">러닝</Option>
-                          <Option value="기타">기타</Option>
+                          {MEETUP_TYPE_OPTIONS.map(option => (
+                            <Option key={option.value} value={option.value}>
+                              {option.label}
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                     </Form>
                   ) : (
-                    <Tag
-                      color={
-                        selectedMeetup.resource.type === '등산'
-                          ? 'blue'
-                          : selectedMeetup.resource.type === '산책'
-                            ? 'green'
-                            : selectedMeetup.resource.type === '러닝'
-                              ? 'orange'
-                              : 'default'
-                      }
-                    >
+                    <Tag color={getTypeColor(selectedMeetup.resource.type)}>
                       {selectedMeetup.resource.type}
                     </Tag>
                   )}
@@ -502,9 +484,11 @@ const MeetupTable = () => {
                           placeholder="난이도를 선택하세요"
                           style={{ width: 120 }}
                         >
-                          <Option value="초급">초급</Option>
-                          <Option value="중급">중급</Option>
-                          <Option value="고급">고급</Option>
+                          {MEETUP_LEVEL_OPTIONS.map(option => (
+                            <Option key={option.value} value={option.value}>
+                              {option.label}
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                     </Form>
