@@ -523,11 +523,6 @@ const MeetupTable = () => {
         </Row>
 
         <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-          <Col xs={24} sm={6} md={4} lg={3}>
-            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
-              검색 결과
-            </Text>
-          </Col>
           <Col xs={24} sm={18} md={20} lg={21}>
             <Space>
               <Button
