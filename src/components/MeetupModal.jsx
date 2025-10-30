@@ -28,15 +28,14 @@ const MeetupFormModal = ({
   onDelete,
   title = null,
   showDeleteButton = true,
-  showLevelField = true,
   showStatusFields = true,
   selectedDate = null,
 }) => {
   const [form] = Form.useForm();
-  const [selectedType, setSelectedType] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedAttendees, setSelectedAttendees] = useState([]);
   const { members } = useMembers();
+  // 서브 리딩자는 AttendeeManager로 관리
 
   const handleOk = async () => {
     try {
@@ -45,7 +44,6 @@ const MeetupFormModal = ({
 
       // 폼 값 초기화
       form.resetFields();
-      setSelectedType(null);
       setSelectedStatus(null);
       setSelectedAttendees([]);
     } catch (error) {
@@ -55,7 +53,6 @@ const MeetupFormModal = ({
 
   const handleCancel = () => {
     form.resetFields();
-    setSelectedType(null);
     setSelectedStatus(null);
     setSelectedAttendees([]);
     onCancel();
@@ -72,6 +69,8 @@ const MeetupFormModal = ({
         title: editingEvent.resource.title,
         leader_nickname: editingEvent.resource.leader_nickname,
         leader_id: editingEvent.resource.leader_id,
+        sub_leader_member_ids:
+          editingEvent.resource.sub_leader_member_ids || [],
         course: editingEvent.resource.course,
         type: editingEvent.resource.type,
         level: editingEvent.resource.level,
@@ -90,11 +89,20 @@ const MeetupFormModal = ({
         start_time: dayjs('09:00', 'HH:mm'),
         status: '진행 전',
         total_donation: 0,
+        sub_leader_member_ids: [],
       });
       setSelectedStatus('진행 전');
       setSelectedAttendees([]);
     }
   }, [editingEvent, form, defaultDate]);
+
+  // (이전 커스텀 핸들러 제거)
+
+  const subLeaderIds = (() => {
+    const value = form.getFieldValue('sub_leader_member_ids');
+    if (Array.isArray(value)) return value;
+    return value ? [value] : [];
+  })();
 
   return (
     <Modal
@@ -151,6 +159,25 @@ const MeetupFormModal = ({
           <Input type="hidden" />
         </Form.Item>
 
+        {/* 서브 리딩자 선택 - 참가자 매니저와 동일 로직 */}
+        <Form.Item label="서브 리딩자">
+          <AttendeeManager
+            attendees={subLeaderIds}
+            onAttendeesChange={ids =>
+              form.setFieldValue('sub_leader_member_ids', ids)
+            }
+            form={form}
+            fieldName="sub_leader_member_ids"
+            disabled={false}
+            storeAsIds={true}
+          />
+        </Form.Item>
+
+        {/* 숨겨진 sub_leader_member_ids 필드 (values 포함용) */}
+        <Form.Item name="sub_leader_member_ids" style={{ display: 'none' }}>
+          <Input type="hidden" />
+        </Form.Item>
+
         <Form.Item
           name="date"
           label="날짜"
@@ -177,10 +204,7 @@ const MeetupFormModal = ({
           label="활동 유형"
           rules={[{ required: true, message: '활동 유형을 선택해주세요' }]}
         >
-          <Select
-            placeholder="활동 유형을 선택하세요"
-            onChange={value => setSelectedType(value)}
-          >
+          <Select placeholder="활동 유형을 선택하세요">
             {MEETUP_TYPE_OPTIONS.map(option => (
               <Option key={option.value} value={option.value}>
                 {option.label}

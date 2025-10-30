@@ -27,6 +27,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { useEvents } from '../hooks/useEvents';
+import { useMembers } from '../hooks/useMembers';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
 import MeetupFormModal from './MeetupModal';
@@ -47,8 +48,10 @@ const MeetupTable = () => {
   const [selectedMeetup, setSelectedMeetup] = useState(null);
   const [isEditingAll, setIsEditingAll] = useState(false);
   const [tempAttendees, setTempAttendees] = useState([]);
+  const [tempSubLeaders, setTempSubLeaders] = useState([]); // memberId 배열
   const [editAllForm] = Form.useForm();
   const { events, addEvent, updateEvent, deleteEvent } = useEvents();
+  const { members } = useMembers();
 
   // 선택된 모임이 변경될 때 상세 정보로 스크롤 이동
   useEffect(() => {
@@ -80,6 +83,9 @@ const MeetupTable = () => {
         title: values.title,
         leader_member_id: values.leader_id,
         leader_nickname: values.leader_nickname,
+        sub_leader_member_ids: (values.sub_leader_member_ids || []).map(id =>
+          typeof id === 'string' ? Number(id) : id
+        ),
         course: values.course || null,
         type: values.type,
         level: values.level || null,
@@ -136,6 +142,7 @@ const MeetupTable = () => {
     });
     // 참가자 데이터도 임시 상태로 복사
     setTempAttendees([...(meetupData.attendees || [])]);
+    setTempSubLeaders([...(meetupData.sub_leader_member_ids || [])]);
   };
 
   const handleSaveAll = async () => {
@@ -156,6 +163,7 @@ const MeetupTable = () => {
         cancel_reason: values.cancel_reason,
         review: values.review,
         attendees: tempAttendees,
+        sub_leader_member_ids: tempSubLeaders,
       };
 
       await updateEvent(selectedMeetup.id, meetupData);
@@ -180,6 +188,7 @@ const MeetupTable = () => {
     setIsEditingAll(false);
     editAllForm.resetFields();
     setTempAttendees([]);
+    setTempSubLeaders([]);
   };
 
   const handleDelete = async () => {
@@ -448,6 +457,27 @@ const MeetupTable = () => {
                       <span>{selectedMeetup.resource.leader_nickname}</span>
                     )}
                   </Space>
+                </Descriptions.Item>
+                <Descriptions.Item label="서브 리딩자">
+                  {isEditingAll ? (
+                    <AttendeeManager
+                      attendees={tempSubLeaders}
+                      onAttendeesChange={setTempSubLeaders}
+                      disabled={false}
+                      storeAsIds={true}
+                    />
+                  ) : selectedMeetup.resource.sub_leader_member_ids &&
+                    selectedMeetup.resource.sub_leader_member_ids.length > 0 ? (
+                    <Space wrap>
+                      {selectedMeetup.resource.sub_leader_member_ids.map(id => (
+                        <Tag key={id}>
+                          {members.find(m => m.id === id)?.nickname || `#${id}`}
+                        </Tag>
+                      ))}
+                    </Space>
+                  ) : (
+                    <span>-</span>
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="활동 유형">
                   {isEditingAll ? (

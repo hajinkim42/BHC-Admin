@@ -35,6 +35,9 @@ function Schedule() {
         title: values.title,
         leader_member_id: values.leader_id,
         leader_nickname: values.leader_nickname,
+        sub_leader_member_ids: (values.sub_leader_member_ids || []).map(id =>
+          typeof id === 'string' ? Number(id) : id
+        ),
         course: values.course || null,
         type: values.type,
         level: values.level || null,
