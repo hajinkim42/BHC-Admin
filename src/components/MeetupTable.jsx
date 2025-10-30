@@ -18,6 +18,7 @@ import {
   Row,
   Col,
   Divider,
+  Checkbox,
 } from 'antd';
 import {
   PlusOutlined,
@@ -25,6 +26,8 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   TeamOutlined,
+  SearchOutlined,
+  ClearOutlined,
 } from '@ant-design/icons';
 import { useEvents } from '../hooks/useEvents';
 import { useMembers } from '../hooks/useMembers';
@@ -53,6 +56,17 @@ const MeetupTable = () => {
   const { events, addEvent, updateEvent, deleteEvent } = useEvents();
   const { members } = useMembers();
 
+  // 검색 상태 관리
+  const [searchFilters, setSearchFilters] = useState({
+    title: '',
+    leader: '',
+    type: [],
+    level: [],
+    status: [],
+    dateRange: null,
+  });
+  const [filteredEvents, setFilteredEvents] = useState(events);
+
   // 선택된 모임이 변경될 때 상세 정보로 스크롤 이동
   useEffect(() => {
     if (selectedMeetup) {
@@ -67,6 +81,81 @@ const MeetupTable = () => {
       }, 100);
     }
   }, [selectedMeetup]);
+
+  // 검색 필터링 로직
+  useEffect(() => {
+    let filtered = events;
+
+    if (searchFilters.title) {
+      filtered = filtered.filter(
+        event =>
+          event.resource.title &&
+          event.resource.title
+            .toLowerCase()
+            .includes(searchFilters.title.toLowerCase())
+      );
+    }
+
+    if (searchFilters.leader) {
+      filtered = filtered.filter(
+        event =>
+          event.resource.leader_nickname &&
+          event.resource.leader_nickname
+            .toLowerCase()
+            .includes(searchFilters.leader.toLowerCase())
+      );
+    }
+
+    if (searchFilters.type && searchFilters.type.length > 0) {
+      filtered = filtered.filter(event =>
+        searchFilters.type.includes(event.resource.type)
+      );
+    }
+
+    if (searchFilters.level && searchFilters.level.length > 0) {
+      filtered = filtered.filter(event =>
+        searchFilters.level.includes(event.resource.level)
+      );
+    }
+
+    if (searchFilters.status && searchFilters.status.length > 0) {
+      filtered = filtered.filter(event =>
+        searchFilters.status.includes(event.resource.status)
+      );
+    }
+
+    if (searchFilters.dateRange && searchFilters.dateRange.length === 2) {
+      const [startDate, endDate] = searchFilters.dateRange;
+      filtered = filtered.filter(event => {
+        const eventDate = dayjs(event.resource.date);
+        return (
+          eventDate.isAfter(startDate.subtract(1, 'day')) &&
+          eventDate.isBefore(endDate.add(1, 'day'))
+        );
+      });
+    }
+
+    setFilteredEvents(filtered);
+  }, [events, searchFilters]);
+
+  // 검색 핸들러 함수들
+  const handleSearchChange = (field, value) => {
+    setSearchFilters(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleClearSearch = () => {
+    setSearchFilters({
+      title: '',
+      leader: '',
+      type: [],
+      level: [],
+      status: [],
+      dateRange: null,
+    });
+  };
 
   const handleAdd = () => {
     setEditingMeetup(null);
@@ -314,9 +403,149 @@ const MeetupTable = () => {
         </Button>
       </div>
 
+      {/* 검색 필터 영역 */}
+      <Card style={{ marginBottom: '16px' }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              제목 검색
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <Input
+              placeholder="제목을 입력하세요"
+              value={searchFilters.title}
+              onChange={e => handleSearchChange('title', e.target.value)}
+              prefix={<SearchOutlined />}
+              allowClear
+            />
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              리딩자 검색
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <Input
+              placeholder="리딩자를 입력하세요"
+              value={searchFilters.leader}
+              onChange={e => handleSearchChange('leader', e.target.value)}
+              prefix={<UserOutlined />}
+              allowClear
+            />
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              날짜 범위
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <DatePicker.RangePicker
+              placeholder={['시작일', '종료일']}
+              value={searchFilters.dateRange}
+              onChange={dates => handleSearchChange('dateRange', dates)}
+              style={{ width: '100%' }}
+            />
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              활동 유형
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <Checkbox.Group
+              value={searchFilters.type}
+              onChange={value => handleSearchChange('type', value)}
+              style={{ width: '100%' }}
+            >
+              <Space direction="horizontal" size="small" wrap>
+                {MEETUP_TYPE_OPTIONS.map(option => (
+                  <Checkbox key={option.value} value={option.value}>
+                    {option.label}
+                  </Checkbox>
+                ))}
+              </Space>
+            </Checkbox.Group>
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              난이도
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <Checkbox.Group
+              value={searchFilters.level}
+              onChange={value => handleSearchChange('level', value)}
+              style={{ width: '100%' }}
+            >
+              <Space direction="horizontal" size="small" wrap>
+                {MEETUP_LEVEL_OPTIONS.map(option => (
+                  <Checkbox key={option.value} value={option.value}>
+                    {option.label}
+                  </Checkbox>
+                ))}
+              </Space>
+            </Checkbox.Group>
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              상태
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <Checkbox.Group
+              value={searchFilters.status}
+              onChange={value => handleSearchChange('status', value)}
+              style={{ width: '100%' }}
+            >
+              <Space direction="horizontal" size="small" wrap>
+                <Checkbox value="진행 전">진행 전</Checkbox>
+                <Checkbox value="완료">완료</Checkbox>
+                <Checkbox value="취소">취소</Checkbox>
+              </Space>
+            </Checkbox.Group>
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} sm={6} md={4} lg={3}>
+            <Text strong style={{ display: 'block', marginBottom: '8px' }}>
+              검색 결과
+            </Text>
+          </Col>
+          <Col xs={24} sm={18} md={20} lg={21}>
+            <Space>
+              <Button
+                icon={<ClearOutlined />}
+                onClick={handleClearSearch}
+                type="default"
+              >
+                검색 초기화
+              </Button>
+              <Text type="secondary">{filteredEvents.length}개</Text>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+
       <Table
         columns={columns}
-        dataSource={events}
+        dataSource={filteredEvents}
         rowKey="id"
         onRow={record => ({
           onClick: () => handleRowClick(record),
