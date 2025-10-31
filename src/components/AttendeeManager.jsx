@@ -152,7 +152,7 @@ const AttendeeManager = ({
         />
       ) : (
         <div style={{ textAlign: 'center', color: '#999', padding: '20px 0' }}>
-          참가자가 없습니다.
+          목록이 비어있습니다.
         </div>
       )}
     </div>
