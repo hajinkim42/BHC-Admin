@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, List, Avatar, Space } from 'antd';
 import { UserOutlined, PlusOutlined } from '@ant-design/icons';
 import MemberAutoComplete from './MemberAutoComplete';
@@ -16,13 +16,26 @@ const AttendeeManager = ({
   const [, setRefreshVersion] = useState(0);
   const { members } = useMembers();
 
+  // form의 값 변경을 감지하기 위한 state
+  const [localAttendees, setLocalAttendees] = useState(
+    form ? form.getFieldValue(fieldName) || [] : attendees
+  );
+
+  // form이나 attendees prop이 변경되면 localAttendees 업데이트
+  useEffect(() => {
+    if (form) {
+      const formValue = form.getFieldValue(fieldName) || [];
+      setLocalAttendees(formValue);
+    } else {
+      setLocalAttendees(attendees);
+    }
+  }, [form, fieldName, attendees]);
+
   // 참가자 추가 핸들러
   const handleAttendeeAdd = memberData => {
     if (!memberData) return;
 
-    const currentAttendees = form
-      ? form.getFieldValue(fieldName) || []
-      : attendees;
+    const currentAttendees = localAttendees;
 
     // 중복 참가자 체크
     const isDuplicate = storeAsIds
@@ -43,6 +56,9 @@ const AttendeeManager = ({
 
       const newAttendees = [...currentAttendees, newAttendee];
 
+      // state 업데이트 (즉시 UI 반영)
+      setLocalAttendees(newAttendees);
+
       if (form) {
         form.setFieldValue(fieldName, newAttendees);
       }
@@ -59,12 +75,18 @@ const AttendeeManager = ({
 
   // 참가자 삭제 핸들러
   const handleAttendeeDelete = attendeeId => {
-    const currentAttendees = form
-      ? form.getFieldValue(fieldName) || []
-      : attendees;
+    // 현재 참석자 목록을 local state에서 가져오기
+    const currentAttendees = localAttendees;
+
     const newAttendees = storeAsIds
       ? currentAttendees.filter(id => id !== attendeeId)
-      : currentAttendees.filter(attendee => attendee.memberId !== attendeeId);
+      : currentAttendees.filter(attendee => {
+          // id나 memberId로 비교 (API에서 가져온 경우 id가 있을 수 있음)
+          return attendee.id !== attendeeId && attendee.memberId !== attendeeId;
+        });
+
+    // state 업데이트 (즉시 UI 반영)
+    setLocalAttendees(newAttendees);
 
     if (form) {
       form.setFieldValue(fieldName, newAttendees);
@@ -78,10 +100,8 @@ const AttendeeManager = ({
     setRefreshVersion(v => v + 1);
   };
 
-  // 현재 참가자 목록
-  const currentAttendees = form
-    ? form.getFieldValue(fieldName) || []
-    : attendees;
+  // 현재 참가자 목록 (local state 사용)
+  const currentAttendees = localAttendees;
 
   return (
     <div>
@@ -119,13 +139,16 @@ const AttendeeManager = ({
         <List
           dataSource={currentAttendees}
           renderItem={attendee => {
-            const attendeeId = storeAsIds ? attendee : attendee.memberId;
+            const attendeeId = storeAsIds
+              ? attendee
+              : attendee.id || attendee.memberId; // id가 있으면 id 사용, 없으면 memberId 사용
             const attendeeName = storeAsIds
               ? members.find(m => m.id === attendeeId)?.nickname ||
                 `#${attendeeId}`
               : attendee.nickname;
             return (
               <List.Item
+                key={attendeeId}
                 actions={
                   !disabled
                     ? [

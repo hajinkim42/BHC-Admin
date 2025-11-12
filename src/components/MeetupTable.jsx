@@ -164,6 +164,7 @@ const MeetupTable = () => {
 
   const handleModalOk = async values => {
     try {
+      const attendees = values.attendees || [];
       const meetupData = {
         date: values.date.format('YYYY-MM-DD'),
         start_time: values.start_time
@@ -181,11 +182,13 @@ const MeetupTable = () => {
         status: values.status,
         cancel_reason: values.cancel_reason || null,
         review: values.review || null,
-        attendees: values.attendees || [],
+        attendees, // 참석자 정보는 별도로 처리하기 위해 전달
       };
 
       if (editingMeetup) {
         await updateEvent(editingMeetup.id, meetupData);
+        // 참석자는 useEvents에서 자동으로 처리됨
+
         // 선택된 모임이 수정된 경우 상세 정보도 업데이트
         if (selectedMeetup && selectedMeetup.id === editingMeetup.id) {
           setSelectedMeetup({
@@ -193,10 +196,12 @@ const MeetupTable = () => {
             resource: {
               ...selectedMeetup.resource,
               ...meetupData,
+              attendees,
             },
           });
         }
       } else {
+        // 일정 추가 (참석자는 useEvents에서 자동으로 처리됨)
         await addEvent(meetupData);
       }
 

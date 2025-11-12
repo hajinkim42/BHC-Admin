@@ -27,6 +27,7 @@ function Schedule() {
 
   const handleModalOk = async values => {
     try {
+      const attendees = values.attendees || [];
       const meetupData = {
         date: values.date.format('YYYY-MM-DD'),
         start_time: values.start_time
@@ -44,12 +45,14 @@ function Schedule() {
         status: values.status,
         cancel_reason: values.cancel_reason || null,
         review: values.review || null,
-        attendees: values.attendees || [],
+        attendees,
       };
 
       if (editingEvent) {
         await updateEvent(editingEvent.id, meetupData);
+        // 참석자는 useEvents에서 자동으로 처리됨
       } else {
+        // 일정 추가 (참석자는 useEvents에서 자동으로 처리됨)
         await addEvent(meetupData);
       }
 

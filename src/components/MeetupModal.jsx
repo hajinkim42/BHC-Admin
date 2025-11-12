@@ -10,6 +10,7 @@ import {
 } from 'antd';
 import dayjs from 'dayjs';
 import { useMembers } from '../hooks/useMembers';
+import { useMeetupAttendees } from '../hooks/useAttendees';
 import MemberAutoComplete from './MemberAutoComplete';
 import AttendeeManager from './AttendeeManager';
 import {
@@ -35,6 +36,8 @@ const MeetupFormModal = ({
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedAttendees, setSelectedAttendees] = useState([]);
   const { members } = useMembers();
+  // 모임 수정 시 참석자 정보 조회
+  const { attendees: fetchedAttendees } = useMeetupAttendees(editingEvent?.id);
   // 서브 리딩자는 AttendeeManager로 관리
 
   const handleOk = async () => {
@@ -65,6 +68,27 @@ const MeetupFormModal = ({
 
   useEffect(() => {
     if (editingEvent) {
+      // API에서 조회한 참석자 정보를 사용 (최신 정보)
+      let attendeesToUse = [];
+
+      if (fetchedAttendees.length > 0) {
+        // API에서 조회한 참석자 정보 사용
+        attendeesToUse = fetchedAttendees.map(attendee => {
+          // 회원 정보 찾기
+          const member = members.find(m => m.id === attendee.member_id);
+          return {
+            id: attendee.id,
+            memberId: attendee.member_id,
+            nickname: attendee.members?.nickname || member?.nickname || '',
+            donationPaid: attendee.donation_paid,
+            donationAmount: attendee.donation_amount,
+          };
+        });
+      } else if (editingEvent.resource.attendees?.length > 0) {
+        // API에서 조회한 정보가 없으면 기존 정보 사용
+        attendeesToUse = editingEvent.resource.attendees;
+      }
+
       form.setFieldsValue({
         title: editingEvent.resource.title,
         leader_nickname: editingEvent.resource.leader_nickname,
@@ -79,10 +103,10 @@ const MeetupFormModal = ({
         review: editingEvent.resource.review,
         date: dayjs(editingEvent.resource.date),
         start_time: dayjs(editingEvent.resource.start_time, 'HH:mm:ss'),
-        attendees: editingEvent.resource.attendees || [],
+        attendees: attendeesToUse,
       });
       setSelectedStatus(editingEvent.resource.status);
-      setSelectedAttendees(editingEvent.resource.attendees || []);
+      setSelectedAttendees(attendeesToUse);
     } else {
       form.setFieldsValue({
         date: defaultDate,
@@ -94,7 +118,7 @@ const MeetupFormModal = ({
       setSelectedStatus('진행 전');
       setSelectedAttendees([]);
     }
-  }, [editingEvent, form, defaultDate]);
+  }, [editingEvent, form, defaultDate, fetchedAttendees, members]);
 
   // (이전 커스텀 핸들러 제거)
 
@@ -251,7 +275,10 @@ const MeetupFormModal = ({
             <Form.Item label="참가자 명단">
               <AttendeeManager
                 attendees={selectedAttendees}
-                onAttendeesChange={setSelectedAttendees}
+                onAttendeesChange={newAttendees => {
+                  setSelectedAttendees(newAttendees);
+                  form.setFieldValue('attendees', newAttendees);
+                }}
                 form={form}
                 fieldName="attendees"
               />
