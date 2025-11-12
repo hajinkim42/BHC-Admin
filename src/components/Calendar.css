@@ -232,7 +232,8 @@
 
 /* 이벤트 컨테이너 높이 조정 */
 .rbc-month-view .rbc-events-container {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
   visibility: visible !important;
   opacity: 1 !important;
 }

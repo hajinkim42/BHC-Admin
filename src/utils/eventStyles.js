@@ -3,6 +3,8 @@ import { getTypeColor } from './meetupTypes';
 // react-big-calendar에서 이벤트의 스타일을 타입별로 지정
 export const getEventStyle = event => {
   const type = event?.resource?.type;
+  const status = event?.resource?.status;
+  const isCancelled = status === '취소';
 
   // meetupTypes의 색상 키워드를 실제 색상 코드로 매핑
   const colorKeyword = getTypeColor(type);
@@ -16,16 +18,20 @@ export const getEventStyle = event => {
     default: '#3174ad',
   };
 
-  const backgroundColor = colorMap[colorKeyword] || colorMap.default;
+  const backgroundColor = isCancelled
+    ? '#d9d9d9' // gray for cancelled events
+    : colorMap[colorKeyword] || colorMap.default;
 
   return {
     style: {
       backgroundColor,
       borderRadius: '5px',
-      opacity: 0.9,
-      color: 'white',
+      opacity: isCancelled ? 0.5 : 0.9, // dimmed for cancelled events
+      color: isCancelled ? '#595959' : 'white',
       border: '0px',
       display: 'block',
+      textDecoration: isCancelled ? 'line-through' : 'none', // strike-through for cancelled events
     },
+    className: isCancelled ? 'rbc-event-cancelled' : '',
   };
 };
