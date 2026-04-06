@@ -1,9 +1,11 @@
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, Tag } from 'antd';
 import {
   CalendarOutlined,
   UserOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
+
+const isDev = import.meta.env.DEV;
 
 const { Sider } = Layout;
 
@@ -34,6 +36,13 @@ const Sidebar = ({ selectedKey, onMenuClick }) => {
         borderRight: '1px solid #f0f0f0',
       }}
     >
+      {isDev && (
+        <div style={{ padding: '12px 16px', textAlign: 'center' }}>
+          <Tag color="orange" style={{ fontSize: '14px', padding: '2px 12px' }}>
+            DEV
+          </Tag>
+        </div>
+      )}
       <Menu
         mode="inline"
         selectedKeys={[selectedKey]}
