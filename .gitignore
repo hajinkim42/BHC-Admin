@@ -78,3 +78,7 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Playwright
+trace.zip
+test-results/
