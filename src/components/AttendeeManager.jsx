@@ -83,6 +83,17 @@ const AttendeeManager = ({
     ? form.getFieldValue(fieldName) || []
     : attendees;
 
+  // 가나다순 정렬
+  const sortedAttendees = [...currentAttendees].sort((a, b) => {
+    const nameA = storeAsIds
+      ? members.find(m => m.id === a)?.nickname || ''
+      : a.nickname || '';
+    const nameB = storeAsIds
+      ? members.find(m => m.id === b)?.nickname || ''
+      : b.nickname || '';
+    return nameA.localeCompare(nameB, 'ko');
+  });
+
   return (
     <div>
       {!disabled && (
@@ -112,12 +123,15 @@ const AttendeeManager = ({
               추가
             </Button> */}
           </Space.Compact>
+          <div style={{ fontSize: 12, color: '#757575', marginTop: 4 }}>
+            * 명단은 가나다순으로 자동 정렬되어 표시됩니다.
+          </div>
         </div>
       )}
 
-      {currentAttendees.length > 0 ? (
+      {sortedAttendees.length > 0 ? (
         <List
-          dataSource={currentAttendees}
+          dataSource={sortedAttendees}
           renderItem={attendee => {
             const attendeeId = storeAsIds ? attendee : attendee.memberId;
             const attendeeName = storeAsIds
